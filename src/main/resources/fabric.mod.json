@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "artorias",
+  "version": "${version}",
+  "name": "Knight Artorias (Dark Souls & Elden Ring Combat)",
+  "description": "Epic Dark Souls boss Knight Artorias featuring full Elden Ring combat mechanics: Stance Break & Riposte, Delayed Attacks, 2nd Phase Rage, and Player Dodge Rolls with i-frames for LAN multiplayer with friends.",
+  "authors": [
+    "DarkSoulsCraft"
+  ],
+  "license": "MIT",
+  "icon": "assets/artorias/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.darkcraft.artorias.ArtoriasMod"
+    ],
+    "client": [
+      "com.darkcraft.artorias.client.ArtoriasClientMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "minecraft": ">=${minecraft_version}",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}

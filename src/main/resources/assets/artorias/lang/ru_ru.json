@@ -1,0 +1,14 @@
+{
+  "entity.artorias.knight_artorias": "Рыцарь Арториас Путник Бездны",
+  "item.artorias.artorias_greatsword": "Двуручный Меч Арториаса",
+  "item.artorias.artorias_greatsword.desc": "ПКМ: Совершить сальто с сокрушительным ударом Бездны!",
+  "item.artorias.abyssal_pendant": "Кулон Бездны",
+  "item.artorias.abyssal_pendant.desc": "Используйте на блоке, чтобы призвать Рыцаря Арториаса",
+  "item.artorias.soul_of_artorias": "Душа Арториаса",
+  "key.artorias.dodge_roll": "Перекат (кадры неуязвимости)",
+  "category.artorias": "Dark Souls Боевка",
+  "message.artorias.boss_spawn": "§4[Dark Souls] §cРыцарь Арториас Путник Бездны пробудился! Приготовьтесь к бою!",
+  "message.artorias.stance_break": "§6⚡ СТОЙКА СЛОМАНА! Арториас оглушен — нанесите КРИТИЧЕСКИЙ УДАР! ⚡",
+  "message.artorias.phase_two": "§5⚔ Бездна поглощает Арториаса! Началась 2-я фаза! ⚔",
+  "message.artorias.boss_slain": "§e⚔ ВЕЛИКИЙ ВРАГ ПОВЕРЖЕН! Покойся с миром, Арториас! ⚔"
+}
