@@ -109,6 +109,10 @@ public class ArtoriasEntity extends HostileEntity {
         }
     }
 
+    public int getAttackTicks() {
+        return this.attackTicks;
+    }
+
     public float getPoise() {
         return this.dataTracker.get(POISE);
     }

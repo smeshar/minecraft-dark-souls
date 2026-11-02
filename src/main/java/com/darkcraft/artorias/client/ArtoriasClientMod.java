@@ -8,7 +8,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import com.darkcraft.artorias.entity.ArtoriasModel;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
@@ -23,7 +25,8 @@ public class ArtoriasClientMod implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        // Register Artorias Entity Renderer
+        // Register Artorias Custom Model Layer and Renderer
+        EntityModelLayerRegistry.registerModelLayer(ArtoriasRenderer.ARTORIAS_LAYER, ArtoriasModel::getTexturedModelData);
         EntityRendererRegistry.register(ArtoriasMod.ARTORIAS_ENTITY, ArtoriasRenderer::new);
 
         // Register Dodge Roll Keybinding (Default: Left Alt)
