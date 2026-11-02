@@ -6,6 +6,8 @@
 
 <br/>
 
+[![Release](https://img.shields.io/github/v/release/smeshar/minecraft-dark-souls?color=red&logo=github&style=for-the-badge)](https://github.com/smeshar/minecraft-dark-souls/releases/tag/v1.0.0)
+[![Download](https://img.shields.io/badge/Download_JAR-v1.0.0-crimson.svg?style=for-the-badge&logo=curseforge&logoColor=white)](https://github.com/smeshar/minecraft-dark-souls/releases/download/v1.0.0/artorias-boss-1.0.0.jar)
 [![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.11-brightgreen.svg?style=for-the-badge&logo=minecraft&logoColor=white)](https://www.minecraft.net/)
 [![Mod Loader](https://img.shields.io/badge/Mod_Loader-Fabric-blue.svg?style=for-the-badge&logo=fabric&logoColor=white)](https://fabricmc.net/)
 [![Fabric API](https://img.shields.io/badge/Fabric_API-0.141.3%2B1.21.11-blueviolet.svg?style=for-the-badge)](https://modrinth.com/mod/fabric-api)
