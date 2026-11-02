@@ -28,6 +28,9 @@ public class AbyssalPendantItem extends Item {
             if (boss != null) {
                 boss.refreshPositionAndAngles(spawnPos.getX() + 0.5, spawnPos.getY(), spawnPos.getZ() + 0.5, context.getPlayerYaw(), 0.0f);
                 world.spawnEntity(boss);
+                if (context.getPlayer() != null) {
+                    boss.setTarget(context.getPlayer());
+                }
 
                 // Dramatic awakening visual and sound effects
                 world.spawnParticles(ParticleTypes.EXPLOSION_EMITTER, spawnPos.getX() + 0.5, spawnPos.getY() + 1.0, spawnPos.getZ() + 0.5, 3, 0.5, 0.5, 0.5, 0.1);

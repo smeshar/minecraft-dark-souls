@@ -6,8 +6,11 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.ActiveTargetGoal;
 import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.ai.goal.LookAroundGoal;
+import net.minecraft.entity.ai.goal.LookAtEntityGoal;
 import net.minecraft.entity.ai.goal.RevengeGoal;
 import net.minecraft.entity.ai.goal.SwimGoal;
+import net.minecraft.entity.ai.goal.WanderAroundFarGoal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.boss.BossBar;
@@ -86,9 +89,12 @@ public class ArtoriasEntity extends HostileEntity {
     protected void initGoals() {
         this.goalSelector.add(1, new SwimGoal(this));
         this.goalSelector.add(2, new ArtoriasCombatGoal(this));
+        this.goalSelector.add(7, new WanderAroundFarGoal(this, 0.85));
+        this.goalSelector.add(8, new LookAtEntityGoal(this, PlayerEntity.class, 24.0f));
+        this.goalSelector.add(8, new LookAroundGoal(this));
 
         this.targetSelector.add(1, new RevengeGoal(this));
-        this.targetSelector.add(2, new ActiveTargetGoal<>(this, PlayerEntity.class, true));
+        this.targetSelector.add(2, new ActiveTargetGoal<>(this, PlayerEntity.class, false));
     }
 
     public int getAttackState() {
@@ -98,6 +104,9 @@ public class ArtoriasEntity extends HostileEntity {
     public void setAttackState(int state) {
         this.dataTracker.set(ATTACK_STATE, state);
         this.attackTicks = 0;
+        if (state == STATE_STAGGERED) {
+            this.staggerTicks = 120;
+        }
     }
 
     public float getPoise() {
@@ -208,6 +217,12 @@ public class ArtoriasEntity extends HostileEntity {
     private void executeAttackTick() {
         if (!(this.getEntityWorld() instanceof ServerWorld sw)) return;
 
+        // Safety watchdog: an attack cannot get stuck for more than 50 ticks
+        if (attackTicks > 50 && getAttackState() != STATE_PHASE_TWO_ROAR) {
+            setAttackState(STATE_IDLE);
+            return;
+        }
+
         switch (getAttackState()) {
             case STATE_PHASE_TWO_ROAR:
                 sw.spawnParticles(ParticleTypes.SOUL_FIRE_FLAME, this.getX(), this.getY() + 1.2, this.getZ(), 15, 1.5, 1.0, 1.5, 0.05);
@@ -233,7 +248,7 @@ public class ArtoriasEntity extends HostileEntity {
                 break;
 
             case STATE_SOMERSAULT_FLIP:
-                if (attackTicks == 22) {
+                if (attackTicks >= 20) {
                     sw.spawnParticles(ParticleTypes.EXPLOSION, this.getX(), this.getY(), this.getZ(), 2, 0.3, 0.1, 0.3, 0.05);
                     sw.spawnParticles(ParticleTypes.SOUL_FIRE_FLAME, this.getX(), this.getY() + 0.2, this.getZ(), 35, 2.2, 0.2, 2.2, 0.06);
 
@@ -265,7 +280,7 @@ public class ArtoriasEntity extends HostileEntity {
                 break;
 
             case STATE_GLIDE_LUNGE:
-                if (attackTicks >= 12 && attackTicks <= 20) {
+                if (attackTicks >= 8 && attackTicks <= 18) {
                     sw.spawnParticles(ParticleTypes.SOUL_FIRE_FLAME, this.getX(), this.getY() + 0.5, this.getZ(), 6, 0.4, 0.4, 0.4, 0.02);
 
                     Box hitBox = this.getBoundingBox().expand(0.8);
@@ -276,13 +291,13 @@ public class ArtoriasEntity extends HostileEntity {
                         }
                     }
                 }
-                if (attackTicks > 24) {
+                if (attackTicks >= 20) {
                     setAttackState(STATE_IDLE);
                 }
                 break;
 
             case STATE_SPIN_SLASH:
-                if (attackTicks == 10) {
+                if (attackTicks >= 10) {
                     sw.spawnParticles(ParticleTypes.SWEEP_ATTACK, this.getX(), this.getY() + 1.2, this.getZ(), 4, 1.2, 0.2, 1.2, 0.0);
                     sw.spawnParticles(ParticleTypes.SOUL_FIRE_FLAME, this.getX(), this.getY() + 1.2, this.getZ(), 20, 2.5, 0.2, 2.5, 0.08);
 
@@ -300,7 +315,7 @@ public class ArtoriasEntity extends HostileEntity {
                 break;
 
             case STATE_ABYSS_SLUDGE:
-                if (attackTicks == 14) {
+                if (attackTicks >= 14) {
                     sw.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_WITCH_THROW, SoundCategory.HOSTILE, 1.2f, 0.6f);
 
                     Vec3d dir = this.getRotationVec(1.0f);
@@ -322,6 +337,10 @@ public class ArtoriasEntity extends HostileEntity {
                     }
                     setAttackState(STATE_IDLE);
                 }
+                break;
+
+            default:
+                setAttackState(STATE_IDLE);
                 break;
         }
     }
@@ -424,6 +443,7 @@ public class ArtoriasEntity extends HostileEntity {
     static class ArtoriasCombatGoal extends Goal {
         private final ArtoriasEntity boss;
         private int cooldown = 20;
+        private int pathUpdateDelay = 0;
 
         public ArtoriasCombatGoal(ArtoriasEntity boss) {
             this.boss = boss;
@@ -432,7 +452,28 @@ public class ArtoriasEntity extends HostileEntity {
 
         @Override
         public boolean canStart() {
-            return boss.getTarget() != null && boss.getTarget().isAlive() && !boss.isStaggered() && boss.getAttackState() == STATE_IDLE;
+            LivingEntity target = boss.getTarget();
+            return target != null && target.isAlive() && !boss.isStaggered();
+        }
+
+        @Override
+        public boolean shouldContinue() {
+            LivingEntity target = boss.getTarget();
+            return target != null && target.isAlive() && !boss.isStaggered();
+        }
+
+        @Override
+        public void start() {
+            this.cooldown = 15;
+            this.pathUpdateDelay = 0;
+        }
+
+        @Override
+        public void stop() {
+            boss.getNavigation().stop();
+            if (boss.getAttackState() != STATE_STAGGERED && boss.getAttackState() != STATE_PHASE_TWO_ROAR) {
+                boss.setAttackState(STATE_IDLE);
+            }
         }
 
         @Override
@@ -440,26 +481,36 @@ public class ArtoriasEntity extends HostileEntity {
             LivingEntity target = boss.getTarget();
             if (target == null) return;
 
-            boss.getLookControl().lookAt(target, 30.0f, 30.0f);
+            boss.getLookControl().lookAt(target, 45.0f, 45.0f);
             double distSq = boss.squaredDistanceTo(target);
 
             cooldown--;
+            pathUpdateDelay--;
 
+            // Move towards player when idle
             if (boss.getAttackState() == STATE_IDLE) {
-                boss.getNavigation().startMovingTo(target, 1.2);
+                if (pathUpdateDelay <= 0) {
+                    pathUpdateDelay = 8;
+                    boss.getNavigation().startMovingTo(target, 1.25);
+                }
+            } else {
+                boss.getNavigation().stop();
             }
 
+            // Attack selector
             if (cooldown <= 0 && boss.getAttackState() == STATE_IDLE) {
                 cooldown = boss.isPhaseTwo() ? 18 : 28;
 
                 if (distSq > 100.0) {
+                    // Far away: Glide Lunge thrust across arena
                     boss.setAttackState(STATE_GLIDE_LUNGE);
                     Vec3d dash = target.getEntityPos().subtract(boss.getEntityPos()).normalize().multiply(1.35).add(0, 0.1, 0);
                     boss.setVelocity(dash);
                     boss.velocityDirty = true;
                     boss.getEntityWorld().playSound(null, boss.getX(), boss.getY(), boss.getZ(),
                             SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.HOSTILE, 1.4f, 0.6f);
-                } else if (distSq > 36.0) {
+                } else if (distSq > 32.0) {
+                    // Mid range: Somersault Flip or Abyss Sludge
                     if (boss.random.nextBoolean()) {
                         boss.setAttackState(STATE_SOMERSAULT_FLIP);
                         Vec3d leap = target.getEntityPos().subtract(boss.getEntityPos()).normalize().multiply(1.15).add(0, 0.75, 0);
@@ -471,6 +522,7 @@ public class ArtoriasEntity extends HostileEntity {
                         boss.setAttackState(STATE_ABYSS_SLUDGE);
                     }
                 } else {
+                    // Close quarters: 360 Spin Slash
                     boss.setAttackState(STATE_SPIN_SLASH);
                 }
             }
