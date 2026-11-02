@@ -39,22 +39,26 @@ public class ArtoriasMod implements ModInitializer {
                     .build(ARTORIAS_KEY)
     );
 
+    public static final RegistryKey<Item> ARTORIAS_GREATSWORD_KEY = RegistryKey.of(RegistryKeys.ITEM, id("artorias_greatsword"));
+    public static final RegistryKey<Item> ABYSSAL_PENDANT_KEY = RegistryKey.of(RegistryKeys.ITEM, id("abyssal_pendant"));
+    public static final RegistryKey<Item> SOUL_OF_ARTORIAS_KEY = RegistryKey.of(RegistryKeys.ITEM, id("soul_of_artorias"));
+
     public static final Item ARTORIAS_GREATSWORD = Registry.register(
             Registries.ITEM,
-            id("artorias_greatsword"),
-            new ArtoriasGreatswordItem(new Item.Settings().rarity(Rarity.EPIC).maxDamage(2500))
+            ARTORIAS_GREATSWORD_KEY,
+            new ArtoriasGreatswordItem(new Item.Settings().registryKey(ARTORIAS_GREATSWORD_KEY).rarity(Rarity.EPIC).maxDamage(2500))
     );
 
     public static final Item ABYSSAL_PENDANT = Registry.register(
             Registries.ITEM,
-            id("abyssal_pendant"),
-            new AbyssalPendantItem(new Item.Settings().rarity(Rarity.RARE).maxCount(1))
+            ABYSSAL_PENDANT_KEY,
+            new AbyssalPendantItem(new Item.Settings().registryKey(ABYSSAL_PENDANT_KEY).rarity(Rarity.RARE).maxCount(1))
     );
 
     public static final Item SOUL_OF_ARTORIAS = Registry.register(
             Registries.ITEM,
-            id("soul_of_artorias"),
-            new Item(new Item.Settings().rarity(Rarity.EPIC).maxCount(16))
+            SOUL_OF_ARTORIAS_KEY,
+            new Item(new Item.Settings().registryKey(SOUL_OF_ARTORIAS_KEY).rarity(Rarity.EPIC).maxCount(16))
     );
 
     @Override
