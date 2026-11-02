@@ -13,11 +13,13 @@ import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.math.Vec2f;
+import net.minecraft.util.math.Vec3d;
 import org.lwjgl.glfw.GLFW;
 
 @Environment(EnvType.CLIENT)
 public class ArtoriasClientMod implements ClientModInitializer {
     public static KeyBinding rollKeyBinding;
+    private static int clientRollCooldown = 0;
 
     @Override
     public void onInitializeClient() {
@@ -34,9 +36,21 @@ public class ArtoriasClientMod implements ClientModInitializer {
 
         // Listen for client roll input
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (clientRollCooldown > 0) {
+                clientRollCooldown--;
+            }
+
             if (client.player == null) return;
 
             while (rollKeyBinding.wasPressed()) {
+                if (clientRollCooldown > 0
+                        || !client.player.isAlive()
+                        || client.player.isSpectator()
+                        || client.player.hasVehicle()
+                        || client.player.getHungerManager().getFoodLevel() <= 2) {
+                    continue;
+                }
+
                 double inputX = 0;
                 double inputZ = 0;
 
@@ -46,7 +60,34 @@ public class ArtoriasClientMod implements ClientModInitializer {
                     inputZ = moveVec.y;
                 }
 
-                // Send Dodge Roll packet to server
+                // Instant client-side physics prediction for butter-smooth dodge
+                Vec3d look = client.player.getRotationVec(1.0f);
+                Vec3d forward = new Vec3d(look.x, 0, look.z).normalize();
+                Vec3d left = new Vec3d(forward.z, 0, -forward.x);
+
+                Vec3d rollDirection;
+                if (Math.abs(inputX) < 0.01 && Math.abs(inputZ) < 0.01) {
+                    // Backstep
+                    rollDirection = forward.multiply(-0.95);
+                } else {
+                    rollDirection = forward.multiply(inputZ).add(left.multiply(inputX)).normalize();
+                }
+
+                double horizontalPower = 1.30;
+                double verticalHop = 0.22;
+                client.player.setVelocity(
+                        rollDirection.x * horizontalPower,
+                        verticalHop,
+                        rollDirection.z * horizontalPower
+                );
+                client.player.velocityDirty = true;
+                clientRollCooldown = 14;
+
+                // Immediate client sound feedback (zero latency)
+                client.player.playSound(net.minecraft.sound.SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, 0.9f, 1.35f);
+                client.player.playSound(net.minecraft.sound.SoundEvents.ITEM_ARMOR_EQUIP_GENERIC.value(), 0.75f, 1.25f);
+
+                // Send Dodge Roll packet to server for validation, i-frames, and server sync
                 if (ClientPlayNetworking.canSend(ModMessages.DodgeRollPayload.ID)) {
                     ClientPlayNetworking.send(new ModMessages.DodgeRollPayload(inputX, inputZ));
                 }

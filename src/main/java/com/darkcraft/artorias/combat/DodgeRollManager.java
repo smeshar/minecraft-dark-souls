@@ -1,5 +1,6 @@
 package com.darkcraft.artorias.combat;
 
+import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -68,20 +69,22 @@ public class DodgeRollManager {
         player.getHungerManager().addExhaustion(1.2f);
 
         // Calculate direction relative to player look angle
+        // In Minecraft: inputZ > 0 is forward, inputZ < 0 is backward
+        // inputX > 0 is left (A), inputX < 0 is right (D)
         Vec3d look = player.getRotationVec(1.0f);
         Vec3d forward = new Vec3d(look.x, 0, look.z).normalize();
-        Vec3d right = new Vec3d(-forward.z, 0, forward.x);
+        Vec3d left = new Vec3d(forward.z, 0, -forward.x);
 
         Vec3d rollDirection;
         if (Math.abs(inputX) < 0.01 && Math.abs(inputZ) < 0.01) {
-            // Standing still: backstep
-            rollDirection = forward.multiply(-0.85);
+            // Standing still: Dark Souls backstep
+            rollDirection = forward.multiply(-0.95);
         } else {
-            rollDirection = forward.multiply(inputZ).add(right.multiply(inputX)).normalize();
+            rollDirection = forward.multiply(inputZ).add(left.multiply(inputX)).normalize();
         }
 
-        double horizontalPower = 1.10;
-        double verticalHop = 0.16;
+        double horizontalPower = 1.30;
+        double verticalHop = 0.22;
 
         player.setVelocity(
                 rollDirection.x * horizontalPower,
@@ -89,13 +92,18 @@ public class DodgeRollManager {
                 rollDirection.z * horizontalPower
         );
         player.velocityDirty = true;
+        player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(player));
 
         if (player.getEntityWorld() instanceof ServerWorld serverWorld) {
             Vec3d pos = player.getEntityPos();
-            serverWorld.spawnParticles(ParticleTypes.POOF, pos.x, pos.y + 0.2, pos.z, 10, 0.3, 0.1, 0.3, 0.05);
-            serverWorld.spawnParticles(ParticleTypes.SMOKE, pos.x, pos.y + 0.1, pos.z, 6, 0.2, 0.1, 0.2, 0.02);
-            serverWorld.playSound(null, pos.x, pos.y, pos.z, SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 0.8f, 1.4f);
-            serverWorld.playSound(null, pos.x, pos.y, pos.z, SoundEvents.BLOCK_SAND_STEP, SoundCategory.PLAYERS, 0.6f, 0.8f);
+            // Sharp sweep slash & abyssal soul trail
+            serverWorld.spawnParticles(ParticleTypes.SWEEP_ATTACK, pos.x + rollDirection.x * 0.6, pos.y + 0.3, pos.z + rollDirection.z * 0.6, 1, 0, 0, 0, 0.0);
+            serverWorld.spawnParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.x, pos.y + 0.1, pos.z, 10, 0.25, 0.08, 0.25, 0.02);
+            serverWorld.spawnParticles(ParticleTypes.CLOUD, pos.x, pos.y + 0.05, pos.z, 6, 0.3, 0.05, 0.3, 0.03);
+
+            // Dynamic Dark Souls roll audio: sharp whoosh & armor clink
+            serverWorld.playSound(null, pos.x, pos.y, pos.z, SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 1.0f, 1.35f);
+            serverWorld.playSound(null, pos.x, pos.y, pos.z, SoundEvents.ITEM_ARMOR_EQUIP_GENERIC, SoundCategory.PLAYERS, 0.85f, 1.25f);
         }
     }
 }
