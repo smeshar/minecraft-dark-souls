@@ -21,6 +21,8 @@ public class DodgeRollManager {
 
     public static final int IFRAME_DURATION_TICKS = 8; // ~0.4s of invulnerability
     public static final int COOLDOWN_TICKS = 14;        // ~0.7s cooldown between rolls
+    public static final double ROLL_HORIZONTAL_POWER = 1.30 / 3.0; // 3x shorter roll distance (~0.433)
+    public static final double ROLL_VERTICAL_HOP = 0.22;
 
     public static void tick(ServerPlayerEntity player) {
         UUID uuid = player.getUuid();
@@ -83,13 +85,10 @@ public class DodgeRollManager {
             rollDirection = forward.multiply(inputZ).add(left.multiply(inputX)).normalize();
         }
 
-        double horizontalPower = 1.30;
-        double verticalHop = 0.22;
-
         player.setVelocity(
-                rollDirection.x * horizontalPower,
-                verticalHop,
-                rollDirection.z * horizontalPower
+                rollDirection.x * ROLL_HORIZONTAL_POWER,
+                ROLL_VERTICAL_HOP,
+                rollDirection.z * ROLL_HORIZONTAL_POWER
         );
         player.velocityDirty = true;
         player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(player));

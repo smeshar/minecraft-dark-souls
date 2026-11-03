@@ -1,6 +1,7 @@
 package com.darkcraft.artorias.client;
 
 import com.darkcraft.artorias.ArtoriasMod;
+import com.darkcraft.artorias.combat.DodgeRollManager;
 import com.darkcraft.artorias.entity.ArtoriasModel;
 import com.darkcraft.artorias.entity.ArtoriasRenderer;
 import com.darkcraft.artorias.network.ModMessages;
@@ -83,8 +84,8 @@ public class ArtoriasClientMod implements ClientModInitializer {
                     rollDirection = forward.multiply(inputZ).add(left.multiply(inputX)).normalize();
                 }
 
-                double horizontalPower = 0.65;
-                double verticalHop = 0.22;
+                double horizontalPower = DodgeRollManager.ROLL_HORIZONTAL_POWER;
+                double verticalHop = DodgeRollManager.ROLL_VERTICAL_HOP;
                 client.player.setVelocity(
                         rollDirection.x * horizontalPower,
                         verticalHop,
