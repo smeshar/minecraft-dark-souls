@@ -76,7 +76,7 @@ public class ArtoriasClientMod implements ClientModInitializer {
                     rollDirection = forward.multiply(inputZ).add(left.multiply(inputX)).normalize();
                 }
 
-                double horizontalPower = 1.30;
+                double horizontalPower = 0.65;
                 double verticalHop = 0.22;
                 client.player.setVelocity(
                         rollDirection.x * horizontalPower,
