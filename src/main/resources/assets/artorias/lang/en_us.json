@@ -1,0 +1,14 @@
+{
+  "entity.artorias.knight_artorias": "Knight Artorias, the Abysswalker",
+  "item.artorias.artorias_greatsword": "Greatsword of Artorias",
+  "item.artorias.artorias_greatsword.desc": "Right-click to perform the Somersault Flip Slam attack!",
+  "item.artorias.abyssal_pendant": "Abyssal Pendant",
+  "item.artorias.abyssal_pendant.desc": "Right-click on the ground to awaken Knight Artorias",
+  "item.artorias.soul_of_artorias": "Soul of Artorias",
+  "key.artorias.dodge_roll": "Dodge Roll (i-frames)",
+  "category.artorias": "Dark Souls Combat",
+  "message.artorias.boss_spawn": "§4[Dark Souls] §cKnight Artorias, the Abysswalker has awakened! Steel yourselves!",
+  "message.artorias.stance_break": "§6⚡ STANCE BROKEN! Artorias is vulnerable for a CRITICAL RIPOSTE! ⚡",
+  "message.artorias.phase_two": "§5⚔ The Abyss overcomes Artorias! Phase 2 has begun! ⚔",
+  "message.artorias.boss_slain": "§e⚔ LEGEND VANQUISHED! Knight Artorias has been laid to rest! ⚔"
+}

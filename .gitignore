@@ -1,0 +1,17 @@
+# Gradle cache and build outputs
+.gradle/
+build/
+bin/
+run/
+out/
+
+# IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# Logs
+hs_err_pid*
+replay_recordings/
