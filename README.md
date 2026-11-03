@@ -6,8 +6,8 @@
 
 <br/>
 
-[![Release](https://img.shields.io/github/v/release/smeshar/minecraft-dark-souls?color=red&logo=github&style=for-the-badge)](https://github.com/smeshar/minecraft-dark-souls/releases/tag/v1.0.0)
-[![Download](https://img.shields.io/badge/Download_JAR-v1.0.0-crimson.svg?style=for-the-badge&logo=curseforge&logoColor=white)](https://github.com/smeshar/minecraft-dark-souls/releases/download/v1.0.0/artorias-boss-1.0.0.jar)
+[![Release](https://img.shields.io/github/v/release/smeshar/minecraft-dark-souls?color=red&logo=github&style=for-the-badge)](https://github.com/smeshar/minecraft-dark-souls/releases/tag/v1.1.0)
+[![Download](https://img.shields.io/badge/Download_JAR-v1.1.0-crimson.svg?style=for-the-badge&logo=curseforge&logoColor=white)](https://github.com/smeshar/minecraft-dark-souls/releases/download/v1.1.0/artorias-boss-1.1.0.jar)
 [![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.11-brightgreen.svg?style=for-the-badge&logo=minecraft&logoColor=white)](https://www.minecraft.net/)
 [![Mod Loader](https://img.shields.io/badge/Mod_Loader-Fabric-blue.svg?style=for-the-badge&logo=fabric&logoColor=white)](https://fabricmc.net/)
 [![Fabric API](https://img.shields.io/badge/Fabric_API-0.141.3%2B1.21.11-blueviolet.svg?style=for-the-badge)](https://modrinth.com/mod/fabric-api)
@@ -50,7 +50,7 @@
 | **Здоровье босса** | **800 HP** | Полоска босс-бара на 10 сегментов, сбалансировано для пати из 2-5 игроков |
 | **Система баланса** | **150 Poise** | Удары в прыжке и тяжелое оружие сбивают стойку босса |
 | **Критический рипост** | **130 Урона** | Наносится в момент, когда ошеломлённый босс падает на колени |
-| **Перекат игрока** | **Клавиша `Left Alt`** | 0.4 секунды полной неуязвимости к любым ударам и взрывам (i-frames) |
+| **Перекат игрока** | **Клавиша `Left Alt`** | 0.4 секунды полной неуязвимости к любым ударам и взрывам (i-frames) с HUD-индикатором |
 | **Удар о землю (Ground Slam)** | **В воздухе + `Ctrl`** | Сокрушительное падение с уроном по площади (4.5 блока), кастомной анимацией, звуком булавы и Dark Souls HUD |
 | **Фазы боя** | **2 Фазы** | При 50% HP активируется взрывной Рёв Бездны и постоянный бафф скорости и ярости |
 
@@ -67,8 +67,9 @@
 
 ### 2. Dodge Roll (Перекат с неуязвимостью)
 - Нажмите **`Левый Alt`** (клавиша настраивается в меню «Настройки» ➔ «Управление» ➔ раздел «Movement / Движение»).
-- Персонаж совершает быстрый акробатический кувырок в направлении взгляда, расходуя немного полоски сытости.
-- Во время первых **0.4 сек (8 тиков)** персонаж получает **полный иммунитет к урону**, что позволяет прокатываться сквозь размашистые удары клинка и ударные волны!
+- Персонаж совершает быстрый сбалансированный кувырок в направлении взгляда, расходуя немного полоски сытости.
+- Во время первых **0.4 сек (8 тиков)** персонаж получает **полный иммунитет к урону** (i-frames), что позволяет прокатываться сквозь размашистые удары клинка и ударные волны!
+- Слева от хотбара отображается симметричный HUD: статус готовности `🛡 ROLL READY`, индикатор активной неуязвимости `⚡ i-FRAMES`, таймер кулдауна и предупреждение об истощении `NO STAMINA`.
 
 ### 3. Ground Slam / Plunge Attack (Сокрушительный удар о землю в падении)
 - Находясь в воздухе (в прыжке или при падении), нажмите **`Ctrl`** (клавиша настраивается в управлении: «Ground Slam»).
@@ -80,7 +81,7 @@
   - Ударная волна `GUST_EMITTER_LARGE`, кольцо пламени Бездны и разлетающиеся осколки блоков поверхности.
   - Камера игрока получает сочную вертикальную отдачу удара.
 - **Dark Souls HUD (Перезарядка 5 секунд):**
-  - Рядом с хотбаром отображается стильный виджет перезарядки.
+  - Справа от хотбара отображается стильный виджет перезарядки.
   - Во время перезарядки отображается заполняющаяся шкала Бездны и таймер с десятыми долями секунды (`SLAM 4.2s`).
   - В воздухе виджет пульсирует лазурным свечением с подсказкой `⚡ [CTRL] SLAM`.
   - При готовности раздается легкий звон готовности способности.
@@ -123,7 +124,7 @@ graph TD
 Для игры с друзьями **не нужен платный сервер**!
 
 1. **Скопируйте мод:**
-   - Поместите `artorias-boss-1.0.1.jar` в папку `.minecraft/mods` у себя и у всех друзей.
+   - Поместите `artorias-boss-1.1.0.jar` в папку `.minecraft/mods` у себя и у всех друзей.
    - Убедитесь, что у всех установлен `fabric-api-0.141.3+1.21.11.jar`.
 2. **Создайте мир:**
    - Зайдите в одиночную игру.
@@ -161,7 +162,7 @@ cd MinecraftDarkSouls
 # Скомпилируйте мод с помощью Gradle Wrapper (требуется Java 21 или Java 25)
 .\gradlew.bat build
 ```
-Готовый `.jar` файл будет создан в папке `build/libs/artorias-boss-1.0.1.jar`.
+Готовый `.jar` файл будет создан в папке `build/libs/artorias-boss-1.1.0.jar`.
 
 ---
 
