@@ -6,6 +6,7 @@
   "item.artorias.abyssal_pendant.desc": "Right-click on the ground to awaken Knight Artorias",
   "item.artorias.soul_of_artorias": "Soul of Artorias",
   "key.artorias.dodge_roll": "Dodge Roll (i-frames)",
+  "key.artorias.ground_slam": "Ground Slam (Air + Ctrl)",
   "category.artorias": "Dark Souls Combat",
   "message.artorias.boss_spawn": "§4[Dark Souls] §cKnight Artorias, the Abysswalker has awakened! Steel yourselves!",
   "message.artorias.stance_break": "§6⚡ STANCE BROKEN! Artorias is vulnerable for a CRITICAL RIPOSTE! ⚡",

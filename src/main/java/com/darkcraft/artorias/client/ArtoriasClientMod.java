@@ -1,6 +1,7 @@
 package com.darkcraft.artorias.client;
 
 import com.darkcraft.artorias.ArtoriasMod;
+import com.darkcraft.artorias.entity.ArtoriasModel;
 import com.darkcraft.artorias.entity.ArtoriasRenderer;
 import com.darkcraft.artorias.network.ModMessages;
 import net.fabricmc.api.ClientModInitializer;
@@ -8,7 +9,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import com.darkcraft.artorias.entity.ArtoriasModel;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
@@ -29,6 +29,9 @@ public class ArtoriasClientMod implements ClientModInitializer {
         EntityModelLayerRegistry.registerModelLayer(ArtoriasRenderer.ARTORIAS_LAYER, ArtoriasModel::getTexturedModelData);
         EntityRendererRegistry.register(ArtoriasMod.ARTORIAS_ENTITY, ArtoriasRenderer::new);
 
+        // Register Ground Slam feature (keybindings, networking, HUD cooldown)
+        GroundSlamClient.initClient();
+
         // Register Dodge Roll Keybinding (Default: Left Alt)
         rollKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.artorias.dodge_roll",
@@ -37,8 +40,12 @@ public class ArtoriasClientMod implements ClientModInitializer {
                 KeyBinding.Category.MOVEMENT
         ));
 
-        // Listen for client roll input
+        // Listen for client tick events
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            // Tick Ground Slam
+            GroundSlamClient.onClientTick(client);
+
+            // Tick Dodge Roll
             if (clientRollCooldown > 0) {
                 clientRollCooldown--;
             }
