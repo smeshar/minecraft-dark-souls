@@ -1,5 +1,6 @@
 package com.darkcraft.artorias.client;
 
+import com.darkcraft.artorias.combat.DodgeRollManager;
 import com.darkcraft.artorias.combat.GroundSlamManager;
 import com.darkcraft.artorias.network.ModMessages;
 import net.fabricmc.api.EnvType;
@@ -64,7 +65,7 @@ public class GroundSlamClient {
             });
         });
 
-        // Register HUD Cooldown Bar
+        // Register HUD Cooldown Bar (renders both Roll and Slam symmetrical indicators)
         HudRenderCallback.EVENT.register(GroundSlamClient::renderHud);
     }
 
@@ -188,11 +189,85 @@ public class GroundSlamClient {
         int screenWidth = context.getScaledWindowWidth();
         int screenHeight = context.getScaledWindowHeight();
 
-        // Dimensions of the Dark Souls ability indicator
+        // 1. Symmetrical Left Indicator: Roll Ready
+        renderRollHud(context, client, screenWidth, screenHeight);
+
+        // 2. Symmetrical Right Indicator: Slam Ready
+        renderSlamHud(context, client, screenWidth, screenHeight);
+    }
+
+    private static void renderRollHud(DrawContext context, MinecraftClient client, int screenWidth, int screenHeight) {
         int widgetWidth = 72;
         int widgetHeight = 16;
 
-        // Position: right next to hotbar (hotbar ends at screenWidth / 2 + 91)
+        // Position: symmetrically to the LEFT of the hotbar (hotbar starts at screenWidth / 2 - 91)
+        int x = screenWidth / 2 - 98 - widgetWidth;
+        int y = screenHeight - 20;
+
+        if (x < 4) {
+            x = 4;
+        }
+
+        // Background: obsidian slate
+        context.fill(x, y, x + widgetWidth, y + widgetHeight, 0xD00A0D14);
+
+        int rollCooldown = ArtoriasClientMod.getRollCooldown();
+
+        if (client.player.getHungerManager().getFoodLevel() <= 2) {
+            // Starving / exhausted: cannot roll
+            context.fill(x + 2, y + 2, x + widgetWidth - 2, y + widgetHeight - 2, 0x40550000);
+            drawBorder(context, x, y, widgetWidth, widgetHeight, 0xFF882222);
+
+            String text = "NO STAMINA";
+            int textX = x + (widgetWidth - client.textRenderer.getWidth(text)) / 2;
+            int textY = y + 4;
+            context.drawTextWithShadow(client.textRenderer, text, textX, textY, 0xFFFF5555);
+        } else if (rollCooldown > 0) {
+            // ON ROLL COOLDOWN / ACTIVE ROLL
+            float progress = 1.0f - ((float) rollCooldown / (float) DodgeRollManager.COOLDOWN_TICKS);
+            int fillW = (int) ((widgetWidth - 4) * progress);
+
+            boolean inIFrames = rollCooldown > (DodgeRollManager.COOLDOWN_TICKS - DodgeRollManager.IFRAME_DURATION_TICKS);
+
+            if (inIFrames) {
+                // Active i-frames invulnerability
+                context.fill(x + 2, y + 2, x + widgetWidth - 2, y + widgetHeight - 2, 0x60FFA000);
+                drawBorder(context, x, y, widgetWidth, widgetHeight, 0xFFFFD700);
+
+                String text = "⚡ i-FRAMES";
+                int textX = x + (widgetWidth - client.textRenderer.getWidth(text)) / 2;
+                int textY = y + 4;
+                context.drawTextWithShadow(client.textRenderer, text, textX, textY, 0xFFFFF176);
+            } else {
+                // Recharging roll cooldown (emerald stamina gradient)
+                if (fillW > 0) {
+                    context.fill(x + 2, y + 2, x + 2 + fillW, y + widgetHeight - 2, 0x902E7D32);
+                }
+                drawBorder(context, x, y, widgetWidth, widgetHeight, 0xFF2A3442);
+
+                float secondsLeft = rollCooldown / 20.0f;
+                String text = String.format(java.util.Locale.ROOT, "ROLL %.1fs", secondsLeft);
+                int textX = x + (widgetWidth - client.textRenderer.getWidth(text)) / 2;
+                int textY = y + 4;
+                context.drawTextWithShadow(client.textRenderer, text, textX, textY, 0xFFB0BEC5);
+            }
+        } else {
+            // READY STATE
+            context.fill(x + 2, y + 2, x + widgetWidth - 2, y + widgetHeight - 2, 0x401E293B);
+            drawBorder(context, x, y, widgetWidth, widgetHeight, 0xFF4A5D6E);
+
+            String text = "🛡 ROLL READY";
+            int textX = x + (widgetWidth - client.textRenderer.getWidth(text)) / 2;
+            int textY = y + 4;
+            context.drawTextWithShadow(client.textRenderer, text, textX, textY, 0xFFFFD700);
+        }
+    }
+
+    private static void renderSlamHud(DrawContext context, MinecraftClient client, int screenWidth, int screenHeight) {
+        int widgetWidth = 72;
+        int widgetHeight = 16;
+
+        // Position: symmetrically to the RIGHT of the hotbar (hotbar ends at screenWidth / 2 + 91)
         int x = screenWidth / 2 + 98;
         int y = screenHeight - 20;
 

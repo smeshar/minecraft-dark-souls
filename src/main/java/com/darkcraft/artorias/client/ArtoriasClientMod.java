@@ -24,6 +24,10 @@ public class ArtoriasClientMod implements ClientModInitializer {
     public static KeyBinding rollKeyBinding;
     private static int clientRollCooldown = 0;
 
+    public static int getRollCooldown() {
+        return clientRollCooldown;
+    }
+
     @Override
     public void onInitializeClient() {
         // Register Artorias Custom Model Layer and Renderer
