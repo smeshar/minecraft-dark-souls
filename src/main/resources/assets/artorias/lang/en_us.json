@@ -5,6 +5,8 @@
   "item.artorias.abyssal_pendant": "Abyssal Pendant",
   "item.artorias.abyssal_pendant.desc": "Right-click on the ground to awaken Knight Artorias",
   "item.artorias.soul_of_artorias": "Soul of Artorias",
+  "item.artorias.artorias_helm": "Helm of Artorias",
+  "item.artorias.artorias_helm.desc": "Helm of the Abysswalker. Grants +5 Attack Damage.",
   "key.artorias.dodge_roll": "Dodge Roll (i-frames)",
   "key.artorias.ground_slam": "Ground Slam (Air + Ctrl)",
   "category.artorias": "Dark Souls Combat",

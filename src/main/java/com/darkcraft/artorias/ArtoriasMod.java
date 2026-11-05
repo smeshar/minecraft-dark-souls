@@ -4,14 +4,26 @@ import com.darkcraft.artorias.combat.CombatEventListener;
 import com.darkcraft.artorias.entity.ArtoriasEntity;
 import com.darkcraft.artorias.item.AbyssalPendantItem;
 import com.darkcraft.artorias.item.ArtoriasGreatswordItem;
+import com.darkcraft.artorias.item.ArtoriasHelmItem;
 import com.darkcraft.artorias.network.ModMessages;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.AttributeModifierSlot;
+import net.minecraft.component.type.AttributeModifiersComponent;
+import net.minecraft.component.type.EquippableComponent;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.SpawnGroup;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroups;
+import net.minecraft.item.equipment.ArmorMaterials;
+import net.minecraft.item.equipment.EquipmentAsset;
+import net.minecraft.item.equipment.EquipmentAssetKeys;
+import net.minecraft.item.equipment.EquipmentType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -42,6 +54,8 @@ public class ArtoriasMod implements ModInitializer {
     public static final RegistryKey<Item> ARTORIAS_GREATSWORD_KEY = RegistryKey.of(RegistryKeys.ITEM, id("artorias_greatsword"));
     public static final RegistryKey<Item> ABYSSAL_PENDANT_KEY = RegistryKey.of(RegistryKeys.ITEM, id("abyssal_pendant"));
     public static final RegistryKey<Item> SOUL_OF_ARTORIAS_KEY = RegistryKey.of(RegistryKeys.ITEM, id("soul_of_artorias"));
+    public static final RegistryKey<Item> ARTORIAS_HELM_KEY = RegistryKey.of(RegistryKeys.ITEM, id("artorias_helm"));
+    public static final RegistryKey<EquipmentAsset> ARTORIAS_HELM_ASSET_KEY = RegistryKey.of(EquipmentAssetKeys.REGISTRY_KEY, id("artorias_helm"));
 
     public static final Item ARTORIAS_GREATSWORD = Registry.register(
             Registries.ITEM,
@@ -61,6 +75,29 @@ public class ArtoriasMod implements ModInitializer {
             new Item(new Item.Settings().registryKey(SOUL_OF_ARTORIAS_KEY).rarity(Rarity.EPIC).maxCount(16))
     );
 
+    public static final Item ARTORIAS_HELM = Registry.register(
+            Registries.ITEM,
+            ARTORIAS_HELM_KEY,
+            new ArtoriasHelmItem(new Item.Settings()
+                    .registryKey(ARTORIAS_HELM_KEY)
+                    .armor(ArmorMaterials.DIAMOND, EquipmentType.HELMET)
+                    .attributeModifiers(ArmorMaterials.DIAMOND.createAttributeModifiers(EquipmentType.HELMET)
+                            .with(
+                                    EntityAttributes.ATTACK_DAMAGE,
+                                    new EntityAttributeModifier(
+                                            id("artorias_helm_attack_damage"),
+                                            5.0,
+                                            EntityAttributeModifier.Operation.ADD_VALUE
+                                    ),
+                                    AttributeModifierSlot.HEAD
+                            ))
+                    .component(DataComponentTypes.EQUIPPABLE, EquippableComponent.builder(EquipmentSlot.HEAD)
+                            .equipSound(ArmorMaterials.DIAMOND.equipSound())
+                            .model(ARTORIAS_HELM_ASSET_KEY)
+                            .build())
+                    .rarity(Rarity.EPIC))
+    );
+
     @Override
     public void onInitialize() {
         LOGGER.info("Knight Artorias Mod initialized! Prepare for Dark Souls combat!");
@@ -72,6 +109,7 @@ public class ArtoriasMod implements ModInitializer {
 
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.COMBAT).register(entries -> {
             entries.add(ARTORIAS_GREATSWORD);
+            entries.add(ARTORIAS_HELM);
             entries.add(ABYSSAL_PENDANT);
             entries.add(SOUL_OF_ARTORIAS);
         });

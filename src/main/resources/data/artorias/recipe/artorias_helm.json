@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:diamond_helmet",
+    "artorias:soul_of_artorias"
+  ],
+  "result": {
+    "count": 1,
+    "id": "artorias:artorias_helm"
+  }
+}

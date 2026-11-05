@@ -428,6 +428,7 @@ public class ArtoriasEntity extends HostileEntity {
         super.dropEquipment(world, source, causedByPlayer);
         this.dropItem(world, ArtoriasMod.ARTORIAS_GREATSWORD);
         this.dropItem(world, ArtoriasMod.SOUL_OF_ARTORIAS);
+        this.dropItem(world, ArtoriasMod.ABYSSAL_PENDANT);
     }
 
     @Override

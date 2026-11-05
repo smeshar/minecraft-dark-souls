@@ -1,0 +1,9 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "artorias:artorias_helm"
+      }
+    ]
+  }
+}

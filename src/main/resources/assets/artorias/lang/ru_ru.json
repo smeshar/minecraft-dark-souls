@@ -5,6 +5,8 @@
   "item.artorias.abyssal_pendant": "Кулон Бездны",
   "item.artorias.abyssal_pendant.desc": "Используйте на блоке, чтобы призвать Рыцаря Арториаса",
   "item.artorias.soul_of_artorias": "Душа Арториаса",
+  "item.artorias.artorias_helm": "Шлем Арториаса",
+  "item.artorias.artorias_helm.desc": "Шлем Путника Бездны. Дарует силу Бездны (+5 к урону).",
   "key.artorias.dodge_roll": "Перекат (кадры неуязвимости)",
   "key.artorias.ground_slam": "Удар о землю (В воздухе + Ctrl)",
   "category.artorias": "Dark Souls Боевка",
