@@ -164,7 +164,7 @@ cd MinecraftDarkSouls
 .\gradlew.bat build
 ```
 Готовый `.jar` файл будет создан в папке `build/libs/artorias-boss-1.1.1.jar`.
-
+ 
 ---
 
 <div align="center">

@@ -20,3 +20,4 @@ public class ArtoriasHelmItem extends Item {
         super.appendTooltip(stack, context, displayComponent, textConsumer, type);
     }
 }
+
