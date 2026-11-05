@@ -70,7 +70,7 @@ public class ArtoriasEntity extends HostileEntity {
         return HostileEntity.createHostileAttributes()
                 .add(EntityAttributes.MAX_HEALTH, 800.0) // 400 Hearts boss HP
                 .add(EntityAttributes.MOVEMENT_SPEED, 0.35)
-                .add(EntityAttributes.ATTACK_DAMAGE, 18.0)
+                .add(EntityAttributes.ATTACK_DAMAGE, 9.0)
                 .add(EntityAttributes.ARMOR, 16.0)
                 .add(EntityAttributes.ARMOR_TOUGHNESS, 8.0)
                 .add(EntityAttributes.KNOCKBACK_RESISTANCE, 0.95)
@@ -239,7 +239,7 @@ public class ArtoriasEntity extends HostileEntity {
                     Box blast = new Box(this.getX() - 8, this.getY() - 2, this.getZ() - 8, this.getX() + 8, this.getY() + 4, this.getZ() + 8);
                     for (Entity e : sw.getOtherEntities(this, blast)) {
                         if (e instanceof PlayerEntity p) {
-                            p.damage(sw, sw.getDamageSources().mobAttack(this), 16.0f);
+                            p.damage(sw, sw.getDamageSources().mobAttack(this), 8.0f);
                             Vec3d push = p.getEntityPos().subtract(this.getEntityPos()).normalize().multiply(1.5).add(0, 0.35, 0);
                             p.setVelocity(push);
                             p.velocityDirty = true;
@@ -262,7 +262,7 @@ public class ArtoriasEntity extends HostileEntity {
                     Box slamBox = new Box(this.getX() - 5, this.getY() - 1, this.getZ() - 5, this.getX() + 5, this.getY() + 3, this.getZ() + 5);
                     for (Entity e : sw.getOtherEntities(this, slamBox)) {
                         if (e instanceof PlayerEntity p) {
-                            p.damage(sw, sw.getDamageSources().mobAttack(this), isPhaseTwo() ? 24.0f : 18.0f);
+                            p.damage(sw, sw.getDamageSources().mobAttack(this), isPhaseTwo() ? 12.0f : 9.0f);
                             p.takeKnockback(1.1, this.getX() - p.getX(), this.getZ() - p.getZ());
                         }
                     }
@@ -290,7 +290,7 @@ public class ArtoriasEntity extends HostileEntity {
                     Box hitBox = this.getBoundingBox().expand(0.8);
                     for (Entity e : sw.getOtherEntities(this, hitBox)) {
                         if (e instanceof PlayerEntity p) {
-                            p.damage(sw, sw.getDamageSources().mobAttack(this), 20.0f);
+                            p.damage(sw, sw.getDamageSources().mobAttack(this), 10.0f);
                             p.takeKnockback(0.9, this.getX() - p.getX(), this.getZ() - p.getZ());
                         }
                     }
@@ -310,7 +310,7 @@ public class ArtoriasEntity extends HostileEntity {
                     Box spinBox = new Box(this.getX() - 4.5, this.getY() - 1, this.getZ() - 4.5, this.getX() + 4.5, this.getY() + 3, this.getZ() + 4.5);
                     for (Entity e : sw.getOtherEntities(this, spinBox)) {
                         if (e instanceof PlayerEntity p) {
-                            p.damage(sw, sw.getDamageSources().mobAttack(this), 19.0f);
+                            p.damage(sw, sw.getDamageSources().mobAttack(this), 9.5f);
                             p.takeKnockback(1.4, this.getX() - p.getX(), this.getZ() - p.getZ());
                         }
                     }
@@ -335,7 +335,7 @@ public class ArtoriasEntity extends HostileEntity {
                         Box sludgeBox = new Box(splashPos.x - 2, splashPos.y - 1, splashPos.z - 2, splashPos.x + 2, splashPos.y + 2, splashPos.z + 2);
                         for (Entity e : sw.getOtherEntities(this, sludgeBox)) {
                             if (e instanceof PlayerEntity p) {
-                                p.damage(sw, sw.getDamageSources().mobAttack(this), 14.0f);
+                                p.damage(sw, sw.getDamageSources().mobAttack(this), 7.0f);
                             }
                         }
                     }
