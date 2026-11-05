@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "artorias:item/lesser_warg_spawn_egg"
+  }
+}

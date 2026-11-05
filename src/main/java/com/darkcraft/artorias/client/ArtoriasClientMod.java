@@ -4,6 +4,12 @@ import com.darkcraft.artorias.ArtoriasMod;
 import com.darkcraft.artorias.combat.DodgeRollManager;
 import com.darkcraft.artorias.entity.ArtoriasModel;
 import com.darkcraft.artorias.entity.ArtoriasRenderer;
+import com.darkcraft.artorias.entity.goblin.GoblinModel;
+import com.darkcraft.artorias.entity.goblin.GoblinRenderer;
+import com.darkcraft.artorias.entity.omen.OmenModel;
+import com.darkcraft.artorias.entity.omen.OmenRenderer;
+import com.darkcraft.artorias.entity.warg.WargModel;
+import com.darkcraft.artorias.entity.warg.WargRenderer;
 import com.darkcraft.artorias.network.ModMessages;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -33,6 +39,21 @@ public class ArtoriasClientMod implements ClientModInitializer {
         // Register Artorias Custom Model Layer and Renderer
         EntityModelLayerRegistry.registerModelLayer(ArtoriasRenderer.ARTORIAS_LAYER, ArtoriasModel::getTexturedModelData);
         EntityRendererRegistry.register(ArtoriasMod.ARTORIAS_ENTITY, ArtoriasRenderer::new);
+
+        // Register Warg Model Layer and Renderers
+        EntityModelLayerRegistry.registerModelLayer(WargRenderer.WARG_LAYER, WargModel::getTexturedModelData);
+        EntityRendererRegistry.register(ArtoriasMod.GIANT_WARG_ENTITY, WargRenderer::new);
+        EntityRendererRegistry.register(ArtoriasMod.LESSER_WARG_ENTITY, WargRenderer::new);
+
+        // Register Omen Model Layer and Renderers
+        EntityModelLayerRegistry.registerModelLayer(OmenRenderer.OMEN_LAYER, OmenModel::getTexturedModelData);
+        EntityRendererRegistry.register(ArtoriasMod.OMEN_CLEAVER_ENTITY, OmenRenderer::new);
+        EntityRendererRegistry.register(ArtoriasMod.OMEN_BRAWLER_ENTITY, OmenRenderer::new);
+
+        // Register Goblin Model Layer and Renderers
+        EntityModelLayerRegistry.registerModelLayer(GoblinRenderer.GOBLIN_LAYER, GoblinModel::getTexturedModelData);
+        EntityRendererRegistry.register(ArtoriasMod.GOBLIN_ENTITY, GoblinRenderer::new);
+        EntityRendererRegistry.register(ArtoriasMod.GOBLIN_KNIGHT_ENTITY, GoblinRenderer::new);
 
         // Register Ground Slam feature (keybindings, networking, HUD cooldown)
         GroundSlamClient.initClient();
