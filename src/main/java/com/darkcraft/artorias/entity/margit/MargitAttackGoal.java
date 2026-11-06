@@ -168,8 +168,8 @@ public class MargitAttackGoal extends Goal {
      * Staff Swing Combo: Deliberate windup, then wide horizontal sweep across the front.
      */
     private void handleStaffSwingCombo(int tick, LivingEntity target) {
-        // Sound and sweep VFX synchronized with animation swing apex (tick 12 = 0.6s)
-        if (tick == 12) {
+        // Sound and sweep VFX synchronized with animation swing apex (tick 8 = 0.4s)
+        if (tick == 8) {
             World world = boss.getWorld();
             if (world instanceof ServerWorld serverWorld) {
                 Vec3d forward = boss.getRotationVec(1.0f).multiply(1.8);
@@ -181,10 +181,10 @@ public class MargitAttackGoal extends Goal {
             }
         }
 
-        // Active hitbox window: ticks 12-15
+        // Active hitbox window: ticks 8-11 (deals damage right during the forward swing)
         if (MargitAttackState.STAFF_SWING_COMBO.isActiveFrame(tick) && !hitAppliedThisState) {
             Vec3d forward = boss.getRotationVec(1.0f).multiply(2.2);
-            Box hitBox = Box.of(boss.getPos().add(forward.x, 1.2, forward.z), 3.8, 2.4, 3.8);
+            Box hitBox = Box.of(boss.getPos().add(forward.x, 1.2, forward.z), 4.0, 2.4, 4.0);
 
             if (applyMeleeHitbox(hitBox, 14.0f, null, 0.55)) {
                 hitAppliedThisState = true;
@@ -196,10 +196,10 @@ public class MargitAttackGoal extends Goal {
      * Staff Leap: Boss leaps high into the air during windup, descending in a crushing slam.
      */
     private void handleStaffLeap(int tick, LivingEntity target) {
-        // Tick 8: Leap launch physics towards player position
-        if (tick == 8) {
+        // Tick 6: Leap launch physics towards player position
+        if (tick == 6) {
             Vec3d leapDir = target.getPos().subtract(boss.getPos()).normalize();
-            boss.setVelocity(leapDir.x * 1.35, 0.72, leapDir.z * 1.35);
+            boss.setVelocity(leapDir.x * 1.35, 0.58, leapDir.z * 1.35);
             boss.velocityModified = true;
 
             World world = boss.getWorld();
@@ -209,8 +209,8 @@ public class MargitAttackGoal extends Goal {
             }
         }
 
-        // Active landing impact: triggers immediately upon ground landing (or apex descent timeout)
-        if (tick >= 16 && !hitAppliedThisState && (boss.isOnGround() || tick >= 22)) {
+        // Active landing impact: triggers right when staff smashes into the ground (ticks 18-22)
+        if (tick >= 18 && !hitAppliedThisState && (boss.isOnGround() || tick >= 22)) {
             Box impactBox = Box.of(boss.getPos().add(0, 0.6, 0), 4.8, 2.5, 4.8);
             applyMeleeHitbox(impactBox, 18.0f, SoundEvents.ENTITY_GENERIC_EXPLODE.value(), 0.85);
 
@@ -231,12 +231,12 @@ public class MargitAttackGoal extends Goal {
         World world = boss.getWorld();
         if (world.isClient()) return;
 
-        // Dagger 1 spawn at tick 7 (synced with forward hand snap)
-        if (tick == 7) {
+        // Dagger 1 spawn at tick 6 (synced with forward hand snap)
+        if (tick == 6) {
             spawnSpectralDagger(target, 0.0);
         }
-        // Dagger 2 spawn at tick 13 (synced with forward hand snap)
-        if (tick == 13) {
+        // Dagger 2 spawn at tick 11 (synced with forward hand snap)
+        if (tick == 11) {
             spawnSpectralDagger(target, 0.15); // Slight lead angle
         }
     }
@@ -261,8 +261,8 @@ public class MargitAttackGoal extends Goal {
      * Tail Swipe: Instant 360-degree sweep around and behind the boss.
      */
     private void handleTailSwipe(int tick, LivingEntity target) {
-        // Sound and circular VFX synchronized with spin apex (tick 7 = 0.35s)
-        if (tick == 7) {
+        // Sound and circular VFX synchronized with spin apex (tick 4 = 0.2s)
+        if (tick == 4) {
             World world = boss.getWorld();
             if (world instanceof ServerWorld serverWorld) {
                 serverWorld.playSound(null, boss.getX(), boss.getY(), boss.getZ(),
@@ -276,7 +276,7 @@ public class MargitAttackGoal extends Goal {
             }
         }
 
-        // Active frames: ticks 6-10
+        // Active frames: ticks 4-7 (deals damage right during the 360 tail whip)
         if (MargitAttackState.TAIL_SWIPE.isActiveFrame(tick) && !hitAppliedThisState) {
             Vec3d rear = boss.getRotationVec(1.0f).multiply(-1.0);
             Box tailBox = Box.of(boss.getPos().add(rear.x, 0.8, rear.z), 5.0, 2.0, 5.0);
@@ -291,15 +291,15 @@ public class MargitAttackGoal extends Goal {
      * Hammer Slam: Phase 2 jump slam with massive radial ground shockwave.
      */
     private void handleHammerSlam(int tick, LivingEntity target) {
-        // Tick 10: Launch high into air
-        if (tick == 10) {
+        // Tick 8: Launch high into air
+        if (tick == 8) {
             Vec3d slamDir = target.getPos().subtract(boss.getPos()).normalize();
-            boss.setVelocity(slamDir.x * 1.4, 0.88, slamDir.z * 1.4);
+            boss.setVelocity(slamDir.x * 1.4, 0.65, slamDir.z * 1.4);
             boss.velocityModified = true;
         }
 
-        // Active slam window: triggers immediately upon ground impact (or apex descent timeout)
-        if (tick >= 21 && !hitAppliedThisState && (boss.isOnGround() || tick >= 26)) {
+        // Active slam window: triggers right when hammer smashes into the ground (ticks 22-26)
+        if (tick >= 22 && !hitAppliedThisState && (boss.isOnGround() || tick >= 26)) {
             boss.performRadialShockwave(6.5, 22.0f);
             hitAppliedThisState = true;
         }
