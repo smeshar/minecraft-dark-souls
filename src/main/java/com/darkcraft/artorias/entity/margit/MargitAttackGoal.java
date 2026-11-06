@@ -168,13 +168,27 @@ public class MargitAttackGoal extends Goal {
      * Staff Swing Combo: Deliberate windup, then wide horizontal sweep across the front.
      */
     private void handleStaffSwingCombo(int tick, LivingEntity target) {
-        // Active hitbox window: ticks 19-26
+        // Sound and sweep VFX synchronized with animation swing apex (tick 12 = 0.6s)
+        if (tick == 12) {
+            World world = boss.getWorld();
+            if (world instanceof ServerWorld serverWorld) {
+                Vec3d forward = boss.getRotationVec(1.0f).multiply(1.8);
+                serverWorld.spawnParticles(ParticleTypes.SWEEP_ATTACK,
+                        boss.getX() + forward.x, boss.getY() + 1.2, boss.getZ() + forward.z,
+                        1, 0, 0, 0, 0);
+                serverWorld.playSound(null, boss.getX(), boss.getY(), boss.getZ(),
+                        SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.HOSTILE, 1.8f, 0.75f);
+            }
+        }
+
+        // Active hitbox window: ticks 12-15
         if (MargitAttackState.STAFF_SWING_COMBO.isActiveFrame(tick) && !hitAppliedThisState) {
             Vec3d forward = boss.getRotationVec(1.0f).multiply(2.2);
-            Box hitBox = Box.of(boss.getPos().add(forward.x, 1.2, forward.z), 3.4, 2.4, 3.4);
+            Box hitBox = Box.of(boss.getPos().add(forward.x, 1.2, forward.z), 3.8, 2.4, 3.8);
 
-            applyMeleeHitbox(hitBox, 14.0f, SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, 0.55);
-            hitAppliedThisState = true;
+            if (applyMeleeHitbox(hitBox, 14.0f, null, 0.55)) {
+                hitAppliedThisState = true;
+            }
         }
     }
 
@@ -195,14 +209,16 @@ public class MargitAttackGoal extends Goal {
             }
         }
 
-        // Active landing impact window: ticks 18-24
-        if (MargitAttackState.STAFF_LEAP.isActiveFrame(tick) && !hitAppliedThisState && boss.isOnGround()) {
-            Box impactBox = Box.of(boss.getPos().add(0, 0.6, 0), 4.6, 2.5, 4.6);
+        // Active landing impact: triggers immediately upon ground landing (or apex descent timeout)
+        if (tick >= 16 && !hitAppliedThisState && (boss.isOnGround() || tick >= 22)) {
+            Box impactBox = Box.of(boss.getPos().add(0, 0.6, 0), 4.8, 2.5, 4.8);
             applyMeleeHitbox(impactBox, 18.0f, SoundEvents.ENTITY_GENERIC_EXPLODE.value(), 0.85);
 
             World world = boss.getWorld();
             if (world instanceof ServerWorld serverWorld) {
                 serverWorld.spawnParticles(ParticleTypes.EXPLOSION, boss.getX(), boss.getY() + 0.2, boss.getZ(), 2, 0.4, 0.1, 0.4, 0.0);
+                serverWorld.playSound(null, boss.getX(), boss.getY(), boss.getZ(),
+                        SoundEvents.ENTITY_GENERIC_EXPLODE.value(), SoundCategory.HOSTILE, 1.8f, 0.8f);
             }
             hitAppliedThisState = true;
         }
@@ -215,12 +231,12 @@ public class MargitAttackGoal extends Goal {
         World world = boss.getWorld();
         if (world.isClient()) return;
 
-        // Dagger 1 spawn at tick 6
-        if (tick == 6) {
+        // Dagger 1 spawn at tick 7 (synced with forward hand snap)
+        if (tick == 7) {
             spawnSpectralDagger(target, 0.0);
         }
-        // Dagger 2 spawn at tick 12
-        if (tick == 12) {
+        // Dagger 2 spawn at tick 13 (synced with forward hand snap)
+        if (tick == 13) {
             spawnSpectralDagger(target, 0.15); // Slight lead angle
         }
     }
@@ -245,17 +261,12 @@ public class MargitAttackGoal extends Goal {
      * Tail Swipe: Instant 360-degree sweep around and behind the boss.
      */
     private void handleTailSwipe(int tick, LivingEntity target) {
-        // Active frames: ticks 9-16
-        if (MargitAttackState.TAIL_SWIPE.isActiveFrame(tick) && !hitAppliedThisState) {
-            // Hitbox covers rear and full 360 circle around Margit
-            Vec3d rear = boss.getRotationVec(1.0f).multiply(-1.0);
-            Box tailBox = Box.of(boss.getPos().add(rear.x, 0.8, rear.z), 4.8, 2.0, 4.8);
-
-            applyMeleeHitbox(tailBox, 13.0f, SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, 0.95);
-
+        // Sound and circular VFX synchronized with spin apex (tick 7 = 0.35s)
+        if (tick == 7) {
             World world = boss.getWorld();
             if (world instanceof ServerWorld serverWorld) {
-                // Circular sweep particles
+                serverWorld.playSound(null, boss.getX(), boss.getY(), boss.getZ(),
+                        SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.HOSTILE, 1.8f, 0.65f);
                 for (int i = 0; i < 16; i++) {
                     double angle = (2 * Math.PI / 16) * i;
                     double px = boss.getX() + 2.2 * Math.cos(angle);
@@ -263,7 +274,16 @@ public class MargitAttackGoal extends Goal {
                     serverWorld.spawnParticles(ParticleTypes.SWEEP_ATTACK, px, boss.getY() + 0.6, pz, 1, 0, 0, 0, 0);
                 }
             }
-            hitAppliedThisState = true;
+        }
+
+        // Active frames: ticks 6-10
+        if (MargitAttackState.TAIL_SWIPE.isActiveFrame(tick) && !hitAppliedThisState) {
+            Vec3d rear = boss.getRotationVec(1.0f).multiply(-1.0);
+            Box tailBox = Box.of(boss.getPos().add(rear.x, 0.8, rear.z), 5.0, 2.0, 5.0);
+
+            if (applyMeleeHitbox(tailBox, 13.0f, null, 0.95)) {
+                hitAppliedThisState = true;
+            }
         }
     }
 
@@ -278,8 +298,8 @@ public class MargitAttackGoal extends Goal {
             boss.velocityModified = true;
         }
 
-        // Active slam window on landing: ticks 22-28
-        if (MargitAttackState.HAMMER_SLAM.isActiveFrame(tick) && !hitAppliedThisState && boss.isOnGround()) {
+        // Active slam window: triggers immediately upon ground impact (or apex descent timeout)
+        if (tick >= 21 && !hitAppliedThisState && (boss.isOnGround() || tick >= 26)) {
             boss.performRadialShockwave(6.5, 22.0f);
             hitAppliedThisState = true;
         }
@@ -288,21 +308,26 @@ public class MargitAttackGoal extends Goal {
     /**
      * Utility method to apply melee damage and knockback within a given Box.
      */
-    private void applyMeleeHitbox(Box box, float damage, net.minecraft.sound.SoundEvent sound, double knockbackStrength) {
+    private boolean applyMeleeHitbox(Box box, float damage, net.minecraft.sound.SoundEvent sound, double knockbackStrength) {
         World world = boss.getWorld();
-        if (!(world instanceof ServerWorld serverWorld)) return;
+        if (!(world instanceof ServerWorld serverWorld)) return false;
 
         List<LivingEntity> targets = serverWorld.getEntitiesByClass(LivingEntity.class, box, e -> e != boss && e.isAlive());
+        boolean hitAny = false;
         for (LivingEntity entity : targets) {
             DamageSource damageSource = world.getDamageSources().mobAttack(boss);
-            entity.damage(damageSource, damage);
-
-            Vec3d knockbackDir = entity.getPos().subtract(boss.getPos()).normalize().multiply(knockbackStrength);
-            entity.addVelocity(knockbackDir.x, 0.35, knockbackDir.z);
-            entity.velocityModified = true;
+            if (entity.damage(damageSource, damage)) {
+                hitAny = true;
+                Vec3d knockbackDir = entity.getPos().subtract(boss.getPos()).normalize().multiply(knockbackStrength);
+                entity.addVelocity(knockbackDir.x, 0.35, knockbackDir.z);
+                entity.velocityModified = true;
+            }
         }
 
-        serverWorld.playSound(null, boss.getX(), boss.getY(), boss.getZ(),
-                sound, SoundCategory.HOSTILE, 1.6f, 0.85f);
+        if (sound != null && hitAny) {
+            serverWorld.playSound(null, boss.getX(), boss.getY(), boss.getZ(),
+                    sound, SoundCategory.HOSTILE, 1.6f, 0.85f);
+        }
+        return hitAny;
     }
 }
