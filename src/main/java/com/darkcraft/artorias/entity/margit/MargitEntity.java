@@ -56,6 +56,7 @@ public class MargitEntity extends HostileEntity implements GeoEntity {
 
     private static final TrackedData<Integer> ATTACK_STATE = DataTracker.registerData(MargitEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> ATTACK_TICKS = DataTracker.registerData(MargitEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Integer> ATTACK_COUNTER = DataTracker.registerData(MargitEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Boolean> PHASE_TWO = DataTracker.registerData(MargitEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Float> POISE = DataTracker.registerData(MargitEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static final TrackedData<Integer> SHACKLE_USES = DataTracker.registerData(MargitEntity.class, TrackedDataHandlerRegistry.INTEGER);
@@ -94,6 +95,7 @@ public class MargitEntity extends HostileEntity implements GeoEntity {
         super.initDataTracker(builder);
         builder.add(ATTACK_STATE, MargitAttackState.IDLE.getId());
         builder.add(ATTACK_TICKS, 0);
+        builder.add(ATTACK_COUNTER, 0);
         builder.add(PHASE_TWO, false);
         builder.add(POISE, MAX_POISE);
         builder.add(SHACKLE_USES, 0);
@@ -132,12 +134,48 @@ public class MargitEntity extends HostileEntity implements GeoEntity {
         return state.setAndContinue(RawAnimation.begin().thenLoop("animation.margit.idle"));
     }
 
+    private int clientLastAttackCounter = -1;
+    private MargitAttackState clientLastAttack = MargitAttackState.IDLE;
+
     private PlayState attackPredicate(AnimationState<MargitEntity> state) {
         MargitAttackState attack = getAttackState();
+        int counter = getAttackCounter();
+
         if (attack != MargitAttackState.IDLE) {
+            // New attack started: reset controller so GeckoLib never skips repeated animations
+            if (counter != this.clientLastAttackCounter || attack != this.clientLastAttack) {
+                this.clientLastAttackCounter = counter;
+                this.clientLastAttack = attack;
+                state.resetCurrentAnimation();
+            }
             return state.setAndContinue(RawAnimation.begin().thenPlay(attack.getAnimationName()));
         }
+
+        // Clean controller reset when returning to idle
+        if (this.clientLastAttack != MargitAttackState.IDLE) {
+            this.clientLastAttack = MargitAttackState.IDLE;
+            state.resetCurrentAnimation();
+        }
         return PlayState.STOP;
+    }
+
+    @Override
+    public void onTrackedDataSet(TrackedData<?> data) {
+        super.onTrackedDataSet(data);
+        if (this.getWorld().isClient() && (ATTACK_COUNTER.equals(data) || ATTACK_STATE.equals(data))) {
+            MargitAttackState state = getAttackState();
+            if (state != MargitAttackState.IDLE) {
+                this.clientLastAttackCounter = getAttackCounter();
+                this.clientLastAttack = state;
+                AnimatableManager<MargitEntity> manager = getAnimatableInstanceCache().getManagerForId(this.getId());
+                if (manager != null) {
+                    AnimationController<MargitEntity> controller = manager.getAnimationControllers().get("attack");
+                    if (controller != null) {
+                        controller.forceAnimationReset();
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -161,9 +199,16 @@ public class MargitEntity extends HostileEntity implements GeoEntity {
         return MargitAttackState.fromId(this.dataTracker.get(ATTACK_STATE));
     }
 
+    public int getAttackCounter() {
+        return this.dataTracker.get(ATTACK_COUNTER);
+    }
+
     public void setAttackState(MargitAttackState state) {
         this.dataTracker.set(ATTACK_STATE, state.getId());
         this.setAttackTicks(0);
+        if (state != MargitAttackState.IDLE) {
+            this.dataTracker.set(ATTACK_COUNTER, getAttackCounter() + 1);
+        }
     }
 
     public int getAttackTicks() {
