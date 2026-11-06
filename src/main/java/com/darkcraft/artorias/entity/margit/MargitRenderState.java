@@ -10,3 +10,4 @@ public class MargitRenderState extends BipedEntityRenderState {
     public int attackTicks = 0;
     public float ageInTicks = 0.0f;
 }
+
