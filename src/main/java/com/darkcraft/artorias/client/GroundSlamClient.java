@@ -210,7 +210,7 @@ public class GroundSlamClient {
             context.fill(x + 2, y + 2, x + widgetWidth - 2, y + widgetHeight - 2, 0x40550000);
             drawBorder(context, x, y, widgetWidth, widgetHeight, 0xFF882222);
 
-            String text = "NO STAMINA";
+            String text = "No stamina";
             int textX = x + (widgetWidth - client.textRenderer.getWidth(text)) / 2;
             int textY = y + 4;
             context.drawTextWithShadow(client.textRenderer, text, textX, textY, 0xFFFF5555);
@@ -226,7 +226,7 @@ public class GroundSlamClient {
                 context.fill(x + 2, y + 2, x + widgetWidth - 2, y + widgetHeight - 2, 0x60FFA000);
                 drawBorder(context, x, y, widgetWidth, widgetHeight, 0xFFFFD700);
 
-                String text = "⚡ i-FRAMES";
+                String text = "Immunity";
                 int textX = x + (widgetWidth - client.textRenderer.getWidth(text)) / 2;
                 int textY = y + 4;
                 context.drawTextWithShadow(client.textRenderer, text, textX, textY, 0xFFFFF176);
@@ -238,7 +238,7 @@ public class GroundSlamClient {
                 drawBorder(context, x, y, widgetWidth, widgetHeight, 0xFF2A3442);
 
                 float secondsLeft = rollCooldown / 20.0f;
-                String text = String.format(java.util.Locale.ROOT, "ROLL %.1fs", secondsLeft);
+                String text = String.format(java.util.Locale.ROOT, "Roll %.1fs", secondsLeft);
                 int textX = x + (widgetWidth - client.textRenderer.getWidth(text)) / 2;
                 int textY = y + 4;
                 context.drawTextWithShadow(client.textRenderer, text, textX, textY, 0xFFB0BEC5);
@@ -248,7 +248,7 @@ public class GroundSlamClient {
             context.fill(x + 2, y + 2, x + widgetWidth - 2, y + widgetHeight - 2, 0x401E293B);
             drawBorder(context, x, y, widgetWidth, widgetHeight, 0xFF4A5D6E);
 
-            String text = "🛡 ROLL READY";
+            String text = "Roll ready";
             int textX = x + (widgetWidth - client.textRenderer.getWidth(text)) / 2;
             int textY = y + 4;
             context.drawTextWithShadow(client.textRenderer, text, textX, textY, 0xFFFFD700);
@@ -286,7 +286,7 @@ public class GroundSlamClient {
 
             // Text: SLAM 4.2s
             float secondsLeft = clientCooldown / 20.0f;
-            String text = String.format(java.util.Locale.ROOT, "SLAM %.1fs", secondsLeft);
+            String text = String.format(java.util.Locale.ROOT, "Slam %.1fs", secondsLeft);
             int textX = x + (widgetWidth - client.textRenderer.getWidth(text)) / 2;
             int textY = y + 4;
             context.drawTextWithShadow(client.textRenderer, text, textX, textY, 0xFFB0BEC5);
@@ -314,7 +314,7 @@ public class GroundSlamClient {
                 } else if (keyText.contains("ALT")) {
                     keyText = "ALT";
                 }
-                String text = "⚡ [" + keyText + "] SLAM";
+                String text = "[" + keyText + "] Slam";
                 int textX = x + (widgetWidth - client.textRenderer.getWidth(text)) / 2;
                 int textY = y + 4;
                 context.drawTextWithShadow(client.textRenderer, text, textX, textY, 0xFF00FFFF);
@@ -323,7 +323,7 @@ public class GroundSlamClient {
                 context.fill(x + 2, y + 2, x + widgetWidth - 2, y + widgetHeight - 2, 0x401E293B);
                 drawBorder(context, x, y, widgetWidth, widgetHeight, 0xFF4A5D6E);
 
-                String text = "⚔ SLAM READY";
+                String text = "Slam ready";
                 int textX = x + (widgetWidth - client.textRenderer.getWidth(text)) / 2;
                 int textY = y + 4;
                 context.drawTextWithShadow(client.textRenderer, text, textX, textY, 0xFFFFD700);
