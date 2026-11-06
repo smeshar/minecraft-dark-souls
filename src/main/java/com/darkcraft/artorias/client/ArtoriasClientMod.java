@@ -2,8 +2,8 @@ package com.darkcraft.artorias.client;
 
 import com.darkcraft.artorias.ArtoriasMod;
 import com.darkcraft.artorias.combat.DodgeRollManager;
-import com.darkcraft.artorias.entity.ArtoriasModel;
-import com.darkcraft.artorias.entity.ArtoriasRenderer;
+import com.darkcraft.artorias.entity.artorias.ArtoriasModel;
+import com.darkcraft.artorias.entity.artorias.ArtoriasRenderer;
 import com.darkcraft.artorias.entity.goblin.GoblinModel;
 import com.darkcraft.artorias.entity.goblin.GoblinRenderer;
 import com.darkcraft.artorias.entity.omen.OmenModel;

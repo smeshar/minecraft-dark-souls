@@ -1,4 +1,4 @@
-package com.darkcraft.artorias.entity;
+package com.darkcraft.artorias.entity.artorias;
 
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
