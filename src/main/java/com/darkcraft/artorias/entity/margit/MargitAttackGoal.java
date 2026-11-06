@@ -109,7 +109,9 @@ public class MargitAttackGoal extends Goal {
                 boss.setAttackState(MargitAttackState.IDLE);
                 boss.setAttackTicks(0);
                 hitAppliedThisState = false;
-                boss.setComboPauseTicks(boss.getRandom().nextInt(15) + 10); // 10-25 ticks pause
+                int pauseMin = boss.isPhaseTwo() ? 2 : 5;
+                int pauseMax = boss.isPhaseTwo() ? 6 : 10;
+                boss.setComboPauseTicks(boss.getRandom().nextInt(pauseMax - pauseMin + 1) + pauseMin);
             }
             return;
         }
@@ -121,19 +123,19 @@ public class MargitAttackGoal extends Goal {
 
         // If in combo recovery pause, smoothly circle/stalk the player
         if (boss.getComboPauseTicks() > 0) {
-            boss.getNavigation().startMovingTo(target, 0.85);
+            boss.getNavigation().startMovingTo(target, 0.95);
             return;
         }
 
         // Move Selection based on distance
-        if (dist > 12.0) {
+        if (dist > 11.0) {
             // Long range: 50% chance leap slam, 50% chance spectral dagger toss
             if (boss.getRandom().nextBoolean()) {
                 initiateAttack(MargitAttackState.STAFF_LEAP);
             } else {
                 initiateAttack(MargitAttackState.DAGGER_TOSS);
             }
-        } else if (dist < 4.0) {
+        } else if (dist < 4.2) {
             // Close range: Fast horizontal combo, or Phase 2 Hammer Slam
             if (boss.isPhaseTwo() && boss.getRandom().nextFloat() < 0.40f) {
                 initiateAttack(MargitAttackState.HAMMER_SLAM);
@@ -141,13 +143,13 @@ public class MargitAttackGoal extends Goal {
                 initiateAttack(MargitAttackState.STAFF_SWING_COMBO);
             }
         } else {
-            // Mid range (4 to 12 blocks): Approach with intimidating boss pace
-            boss.getNavigation().startMovingTo(target, 1.15);
+            // Mid range (4.2 to 11 blocks): Approach with aggressive pace
+            boss.getNavigation().startMovingTo(target, 1.25);
 
-            // Chance to jump-slam or toss daggers while closing distance
-            if (boss.isPhaseTwo() && boss.getRandom().nextFloat() < 0.05f) {
+            // Responsive chance to jump-slam or toss daggers while closing distance
+            if (boss.isPhaseTwo() && boss.getRandom().nextFloat() < 0.12f) {
                 initiateAttack(MargitAttackState.HAMMER_SLAM);
-            } else if (boss.getRandom().nextFloat() < 0.04f) {
+            } else if (boss.getRandom().nextFloat() < 0.08f) {
                 initiateAttack(MargitAttackState.DAGGER_TOSS);
             }
         }
@@ -182,10 +184,10 @@ public class MargitAttackGoal extends Goal {
      * Staff Leap: Boss leaps high into the air during windup, descending in a crushing slam.
      */
     private void handleStaffLeap(int tick, LivingEntity target) {
-        // Tick 14: Leap launch physics towards player position
-        if (tick == 14) {
+        // Tick 8: Leap launch physics towards player position
+        if (tick == 8) {
             Vec3d leapDir = target.getPos().subtract(boss.getPos()).normalize();
-            boss.setVelocity(leapDir.x * 1.3, 0.72, leapDir.z * 1.3);
+            boss.setVelocity(leapDir.x * 1.35, 0.72, leapDir.z * 1.35);
             boss.velocityModified = true;
 
             World world = boss.getWorld();
@@ -195,7 +197,7 @@ public class MargitAttackGoal extends Goal {
             }
         }
 
-        // Active landing impact window: ticks 29-36
+        // Active landing impact window: ticks 18-24
         if (MargitAttackState.STAFF_LEAP.isActiveFrame(tick) && !hitAppliedThisState && boss.isOnGround()) {
             Box impactBox = Box.of(boss.getPos().add(0, 0.6, 0), 4.6, 2.5, 4.6);
             applyMeleeHitbox(impactBox, 18.0f, SoundEvents.ENTITY_GENERIC_EXPLODE.value(), 0.85);
@@ -215,12 +217,12 @@ public class MargitAttackGoal extends Goal {
         World world = boss.getWorld();
         if (world.isClient()) return;
 
-        // Dagger 1 spawn at tick 13
-        if (tick == 13) {
+        // Dagger 1 spawn at tick 6
+        if (tick == 6) {
             spawnSpectralDagger(target, 0.0);
         }
-        // Dagger 2 spawn at tick 24
-        if (tick == 24) {
+        // Dagger 2 spawn at tick 12
+        if (tick == 12) {
             spawnSpectralDagger(target, 0.15); // Slight lead angle
         }
     }
@@ -271,14 +273,14 @@ public class MargitAttackGoal extends Goal {
      * Hammer Slam: Phase 2 jump slam with massive radial ground shockwave.
      */
     private void handleHammerSlam(int tick, LivingEntity target) {
-        // Tick 18: Launch high into air
-        if (tick == 18) {
+        // Tick 10: Launch high into air
+        if (tick == 10) {
             Vec3d slamDir = target.getPos().subtract(boss.getPos()).normalize();
-            boss.setVelocity(slamDir.x * 1.4, 0.92, slamDir.z * 1.4);
+            boss.setVelocity(slamDir.x * 1.4, 0.88, slamDir.z * 1.4);
             boss.velocityModified = true;
         }
 
-        // Active slam window on landing: ticks 36-44
+        // Active slam window on landing: ticks 22-28
         if (MargitAttackState.HAMMER_SLAM.isActiveFrame(tick) && !hitAppliedThisState && boss.isOnGround()) {
             boss.performRadialShockwave(6.5, 22.0f);
             hitAppliedThisState = true;
