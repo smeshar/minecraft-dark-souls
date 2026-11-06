@@ -55,13 +55,13 @@ public class MargitDaggerEntity extends ProjectileEntity {
         ProjectileUtil.setRotationFromVelocity(this, 0.5f);
 
         // Spawn glowing golden trail particles
-        if (this.getEntityWorld().isClient()) {
-            this.getEntityWorld().addParticleClient(ParticleTypes.WAX_ON, this.getX(), this.getY(), this.getZ(), 0, 0, 0);
-            this.getEntityWorld().addParticleClient(ParticleTypes.GLOW, this.getX(), this.getY(), this.getZ(), 0, 0, 0);
+        if (this.getWorld().isClient()) {
+            this.getWorld().addParticle(ParticleTypes.WAX_ON, this.getX(), this.getY(), this.getZ(), 0, 0, 0);
+            this.getWorld().addParticle(ParticleTypes.GLOW, this.getX(), this.getY(), this.getZ(), 0, 0, 0);
         }
 
         lifeTicks++;
-        if (lifeTicks > 100 && !this.getEntityWorld().isClient()) {
+        if (lifeTicks > 100 && !this.getWorld().isClient()) {
             this.discard();
         }
     }
@@ -73,14 +73,14 @@ public class MargitDaggerEntity extends ProjectileEntity {
         Entity owner = this.getOwner();
 
         if (target != owner && target instanceof LivingEntity livingTarget) {
-            World world = this.getEntityWorld();
+            World world = this.getWorld();
             DamageSource damageSource = world.getDamageSources().indirectMagic(this, owner);
-            livingTarget.damage((ServerWorld) world, damageSource, DAMAGE);
+            livingTarget.damage(damageSource, DAMAGE);
 
             // Stagger target slightly
             Vec3d knockback = this.getVelocity().normalize().multiply(0.4);
             livingTarget.addVelocity(knockback.x, 0.1, knockback.z);
-            livingTarget.velocityDirty = true;
+            livingTarget.velocityModified = true;
 
             if (world instanceof ServerWorld serverWorld) {
                 serverWorld.spawnParticles(ParticleTypes.WAX_OFF, this.getX(), this.getY(), this.getZ(), 10, 0.2, 0.2, 0.2, 0.05);
@@ -93,7 +93,7 @@ public class MargitDaggerEntity extends ProjectileEntity {
     @Override
     protected void onBlockHit(BlockHitResult blockHitResult) {
         super.onBlockHit(blockHitResult);
-        World world = this.getEntityWorld();
+        World world = this.getWorld();
         if (world instanceof ServerWorld serverWorld) {
             serverWorld.spawnParticles(ParticleTypes.WAX_OFF, this.getX(), this.getY(), this.getZ(), 8, 0.2, 0.2, 0.2, 0.05);
             serverWorld.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.BLOCK_AMETHYST_BLOCK_CHIME, SoundCategory.HOSTILE, 1.0f, 1.6f);

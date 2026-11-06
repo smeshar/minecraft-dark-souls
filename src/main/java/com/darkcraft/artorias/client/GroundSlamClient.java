@@ -41,7 +41,7 @@ public class GroundSlamClient {
                 "key.artorias.ground_slam",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_LEFT_CONTROL,
-                KeyBinding.Category.MOVEMENT
+                KeyBinding.MOVEMENT_CATEGORY
         ));
 
         // Register S2C Packet Listeners
@@ -110,13 +110,13 @@ public class GroundSlamClient {
         // 4. Local Slamming descent physics & landing detection
         if (clientIsSlamming) {
             // Local visual trail
-            player.getEntityWorld().addParticleClient(ParticleTypes.SOUL_FIRE_FLAME, player.getX(), player.getY() + 0.3, player.getZ(), 0.0, 0.05, 0.0);
-            player.getEntityWorld().addParticleClient(ParticleTypes.SWEEP_ATTACK, player.getX(), player.getY() + 0.35, player.getZ(), 0.0, 0.0, 0.0);
+            player.getWorld().addParticle(ParticleTypes.SOUL_FIRE_FLAME, player.getX(), player.getY() + 0.3, player.getZ(), 0.0, 0.05, 0.0);
+            player.getWorld().addParticle(ParticleTypes.SWEEP_ATTACK, player.getX(), player.getY() + 0.35, player.getZ(), 0.0, 0.0, 0.0);
 
             // Maintain rapid plunge velocity
             if (player.getVelocity().y > -1.2) {
                 player.setVelocity(player.getVelocity().x * 0.75, GroundSlamManager.DOWNWARD_SPEED, player.getVelocity().z * 0.75);
-                player.velocityDirty = true;
+                player.velocityModified = true;
             }
 
             // Impact check
@@ -147,7 +147,7 @@ public class GroundSlamClient {
 
                 Vec3d currentVel = player.getVelocity();
                 player.setVelocity(currentVel.x * 0.25, GroundSlamManager.DOWNWARD_SPEED, currentVel.z * 0.25);
-                player.velocityDirty = true;
+                player.velocityModified = true;
 
                 player.playSound(SoundEvents.ITEM_MACE_SMASH_AIR, 1.35f, 0.95f);
                 player.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, 0.9f, 0.65f);

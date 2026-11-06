@@ -65,7 +65,7 @@ public class MargitAttackGoal extends Goal {
 
         // Vector math: calculate boss horizontal facing and vector towards player
         Vec3d bossFacing = boss.getRotationVec(1.0f);
-        Vec3d toTarget = target.getEntityPos().subtract(boss.getEntityPos()).normalize();
+        Vec3d toTarget = target.getPos().subtract(boss.getPos()).normalize();
         // Dot product in horizontal plane (X-Z)
         double dotProduct = (bossFacing.x * toTarget.x) + (bossFacing.z * toTarget.z);
 
@@ -171,7 +171,7 @@ public class MargitAttackGoal extends Goal {
         // Active hitbox window: ticks 19-26
         if (MargitAttackState.STAFF_SWING_COMBO.isActiveFrame(tick) && !hitAppliedThisState) {
             Vec3d forward = boss.getRotationVec(1.0f).multiply(2.2);
-            Box hitBox = Box.of(boss.getEntityPos().add(forward.x, 1.2, forward.z), 3.4, 2.4, 3.4);
+            Box hitBox = Box.of(boss.getPos().add(forward.x, 1.2, forward.z), 3.4, 2.4, 3.4);
 
             applyMeleeHitbox(hitBox, 14.0f, SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, 0.55);
             hitAppliedThisState = true;
@@ -184,11 +184,11 @@ public class MargitAttackGoal extends Goal {
     private void handleStaffLeap(int tick, LivingEntity target) {
         // Tick 14: Leap launch physics towards player position
         if (tick == 14) {
-            Vec3d leapDir = target.getEntityPos().subtract(boss.getEntityPos()).normalize();
+            Vec3d leapDir = target.getPos().subtract(boss.getPos()).normalize();
             boss.setVelocity(leapDir.x * 1.3, 0.72, leapDir.z * 1.3);
-            boss.velocityDirty = true;
+            boss.velocityModified = true;
 
-            World world = boss.getEntityWorld();
+            World world = boss.getWorld();
             if (world instanceof ServerWorld serverWorld) {
                 serverWorld.playSound(null, boss.getX(), boss.getY(), boss.getZ(),
                         SoundEvents.ENTITY_ENDER_DRAGON_FLAP, SoundCategory.HOSTILE, 1.5f, 0.7f);
@@ -197,10 +197,10 @@ public class MargitAttackGoal extends Goal {
 
         // Active landing impact window: ticks 29-36
         if (MargitAttackState.STAFF_LEAP.isActiveFrame(tick) && !hitAppliedThisState && boss.isOnGround()) {
-            Box impactBox = Box.of(boss.getEntityPos().add(0, 0.6, 0), 4.6, 2.5, 4.6);
+            Box impactBox = Box.of(boss.getPos().add(0, 0.6, 0), 4.6, 2.5, 4.6);
             applyMeleeHitbox(impactBox, 18.0f, SoundEvents.ENTITY_GENERIC_EXPLODE.value(), 0.85);
 
-            World world = boss.getEntityWorld();
+            World world = boss.getWorld();
             if (world instanceof ServerWorld serverWorld) {
                 serverWorld.spawnParticles(ParticleTypes.EXPLOSION, boss.getX(), boss.getY() + 0.2, boss.getZ(), 2, 0.4, 0.1, 0.4, 0.0);
             }
@@ -212,7 +212,7 @@ public class MargitAttackGoal extends Goal {
      * Dagger Toss: Throws 2 spectral golden daggers consecutively at frame-perfect timings.
      */
     private void handleDaggerToss(int tick, LivingEntity target) {
-        World world = boss.getEntityWorld();
+        World world = boss.getWorld();
         if (world.isClient()) return;
 
         // Dagger 1 spawn at tick 13
@@ -226,11 +226,11 @@ public class MargitAttackGoal extends Goal {
     }
 
     private void spawnSpectralDagger(LivingEntity target, double leadAngle) {
-        World world = boss.getEntityWorld();
+        World world = boss.getWorld();
         MargitDaggerEntity dagger = new MargitDaggerEntity(world, boss);
 
         Vec3d targetPos = target.getEyePos().subtract(0, 0.2, 0);
-        Vec3d launchVec = targetPos.subtract(dagger.getEntityPos()).normalize();
+        Vec3d launchVec = targetPos.subtract(dagger.getPos()).normalize();
 
         dagger.setVelocity(launchVec.x + leadAngle, launchVec.y + 0.05, launchVec.z + leadAngle, 1.85f, 1.0f);
         world.spawnEntity(dagger);
@@ -249,11 +249,11 @@ public class MargitAttackGoal extends Goal {
         if (MargitAttackState.TAIL_SWIPE.isActiveFrame(tick) && !hitAppliedThisState) {
             // Hitbox covers rear and full 360 circle around Margit
             Vec3d rear = boss.getRotationVec(1.0f).multiply(-1.0);
-            Box tailBox = Box.of(boss.getEntityPos().add(rear.x, 0.8, rear.z), 4.8, 2.0, 4.8);
+            Box tailBox = Box.of(boss.getPos().add(rear.x, 0.8, rear.z), 4.8, 2.0, 4.8);
 
             applyMeleeHitbox(tailBox, 13.0f, SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, 0.95);
 
-            World world = boss.getEntityWorld();
+            World world = boss.getWorld();
             if (world instanceof ServerWorld serverWorld) {
                 // Circular sweep particles
                 for (int i = 0; i < 16; i++) {
@@ -273,9 +273,9 @@ public class MargitAttackGoal extends Goal {
     private void handleHammerSlam(int tick, LivingEntity target) {
         // Tick 18: Launch high into air
         if (tick == 18) {
-            Vec3d slamDir = target.getEntityPos().subtract(boss.getEntityPos()).normalize();
+            Vec3d slamDir = target.getPos().subtract(boss.getPos()).normalize();
             boss.setVelocity(slamDir.x * 1.4, 0.92, slamDir.z * 1.4);
-            boss.velocityDirty = true;
+            boss.velocityModified = true;
         }
 
         // Active slam window on landing: ticks 36-44
@@ -289,17 +289,17 @@ public class MargitAttackGoal extends Goal {
      * Utility method to apply melee damage and knockback within a given Box.
      */
     private void applyMeleeHitbox(Box box, float damage, net.minecraft.sound.SoundEvent sound, double knockbackStrength) {
-        World world = boss.getEntityWorld();
+        World world = boss.getWorld();
         if (!(world instanceof ServerWorld serverWorld)) return;
 
         List<LivingEntity> targets = serverWorld.getEntitiesByClass(LivingEntity.class, box, e -> e != boss && e.isAlive());
         for (LivingEntity entity : targets) {
             DamageSource damageSource = world.getDamageSources().mobAttack(boss);
-            entity.damage(serverWorld, damageSource, damage);
+            entity.damage(damageSource, damage);
 
-            Vec3d knockbackDir = entity.getEntityPos().subtract(boss.getEntityPos()).normalize().multiply(knockbackStrength);
+            Vec3d knockbackDir = entity.getPos().subtract(boss.getPos()).normalize().multiply(knockbackStrength);
             entity.addVelocity(knockbackDir.x, 0.35, knockbackDir.z);
-            entity.velocityDirty = true;
+            entity.velocityModified = true;
         }
 
         serverWorld.playSound(null, boss.getX(), boss.getY(), boss.getZ(),

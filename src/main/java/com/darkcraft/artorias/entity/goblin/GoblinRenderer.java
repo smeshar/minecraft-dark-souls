@@ -7,7 +7,7 @@ import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 
-public class GoblinRenderer extends BipedEntityRenderer<GoblinEntity, GoblinRenderState, GoblinModel> {
+public class GoblinRenderer extends BipedEntityRenderer<GoblinEntity, GoblinModel> {
     public static final EntityModelLayer GOBLIN_LAYER = new EntityModelLayer(ArtoriasMod.id("goblin"), "main");
     private static final Identifier GOBLIN_TEXTURE = ArtoriasMod.id("textures/entity/goblin.png");
     private static final Identifier GOBLIN_KNIGHT_TEXTURE = ArtoriasMod.id("textures/entity/goblin_knight.png");
@@ -17,22 +17,8 @@ public class GoblinRenderer extends BipedEntityRenderer<GoblinEntity, GoblinRend
     }
 
     @Override
-    public GoblinRenderState createRenderState() {
-        return new GoblinRenderState();
-    }
-
-    @Override
-    public void updateRenderState(GoblinEntity entity, GoblinRenderState state, float tickDelta) {
-        super.updateRenderState(entity, state, tickDelta);
-        state.attackState = entity.getAttackState();
-        state.attackTicks = entity.getAttackTicks();
-        state.isKnight = (entity instanceof GoblinKnightEntity);
-        state.ageInTicks = entity.age + tickDelta;
-    }
-
-    @Override
-    protected void scale(GoblinRenderState state, MatrixStack matrices) {
-        if (state.isKnight) {
+    protected void scale(GoblinEntity entity, MatrixStack matrices, float amount) {
+        if (entity instanceof GoblinKnightEntity) {
             matrices.scale(0.85f, 0.85f, 0.85f);
         } else {
             matrices.scale(0.75f, 0.75f, 0.75f);
@@ -40,7 +26,7 @@ public class GoblinRenderer extends BipedEntityRenderer<GoblinEntity, GoblinRend
     }
 
     @Override
-    public Identifier getTexture(GoblinRenderState state) {
-        return state.isKnight ? GOBLIN_KNIGHT_TEXTURE : GOBLIN_TEXTURE;
+    public Identifier getTexture(GoblinEntity entity) {
+        return (entity instanceof GoblinKnightEntity) ? GOBLIN_KNIGHT_TEXTURE : GOBLIN_TEXTURE;
     }
 }

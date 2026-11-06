@@ -9,9 +9,9 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 
@@ -33,21 +33,21 @@ public class MargitShackleItem extends Item {
     }
 
     @Override
-    public ActionResult use(World world, PlayerEntity player, Hand hand) {
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack stack = player.getStackInHand(hand);
 
-        if (player.getItemCooldownManager().isCoolingDown(stack)) {
-            return ActionResult.FAIL;
+        if (player.getItemCooldownManager().isCoolingDown(this)) {
+            return TypedActionResult.fail(stack);
         }
 
-        Box searchBox = Box.of(player.getEntityPos(), MAX_DISTANCE * 2, MAX_DISTANCE * 2, MAX_DISTANCE * 2);
+        Box searchBox = Box.of(player.getPos(), MAX_DISTANCE * 2, MAX_DISTANCE * 2, MAX_DISTANCE * 2);
         List<MargitEntity> nearbyMargits = world.getEntitiesByClass(MargitEntity.class, searchBox, MargitEntity::isAlive);
 
         if (nearbyMargits.isEmpty()) {
             if (!world.isClient()) {
                 player.sendMessage(Text.translatable("message.artorias.shackle_no_boss").formatted(Formatting.GRAY), true);
             }
-            return ActionResult.PASS;
+            return TypedActionResult.pass(stack);
         }
 
         // Target the closest Margit within range
@@ -56,7 +56,7 @@ public class MargitShackleItem extends Item {
                 .orElse(null);
 
         if (targetBoss == null) {
-            return ActionResult.PASS;
+            return TypedActionResult.pass(stack);
         }
 
         // Phase 2 immunity check
@@ -66,8 +66,8 @@ public class MargitShackleItem extends Item {
                 world.playSound(null, player.getX(), player.getY(), player.getZ(),
                         SoundEvents.BLOCK_ANVIL_HIT, SoundCategory.PLAYERS, 1.2f, 0.5f);
             }
-            player.getItemCooldownManager().set(stack, 60);
-            return ActionResult.FAIL;
+            player.getItemCooldownManager().set(this, 60);
+            return TypedActionResult.fail(stack);
         }
 
         // Maximum 2 uses per boss fight
@@ -77,8 +77,8 @@ public class MargitShackleItem extends Item {
                 world.playSound(null, player.getX(), player.getY(), player.getZ(),
                         SoundEvents.ITEM_SHIELD_BREAK, SoundCategory.PLAYERS, 1.0f, 1.8f);
             }
-            player.getItemCooldownManager().set(stack, 60);
-            return ActionResult.FAIL;
+            player.getItemCooldownManager().set(this, 60);
+            return TypedActionResult.fail(stack);
         }
 
         // Apply Shackle pinning effect
@@ -105,11 +105,11 @@ public class MargitShackleItem extends Item {
                         SoundEvents.BLOCK_CHAIN_BREAK, SoundCategory.PLAYERS, 2.0f, 0.8f);
 
                 player.sendMessage(Text.translatable("message.artorias.shackle_bound").formatted(Formatting.GOLD), true);
-                player.getItemCooldownManager().set(stack, COOLDOWN_TICKS);
-                return ActionResult.SUCCESS;
+                player.getItemCooldownManager().set(this, COOLDOWN_TICKS);
+                return TypedActionResult.success(stack, world.isClient());
             }
         }
 
-        return ActionResult.SUCCESS;
+        return TypedActionResult.success(stack, world.isClient());
     }
 }

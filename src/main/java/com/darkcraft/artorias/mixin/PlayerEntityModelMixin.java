@@ -2,7 +2,7 @@ package com.darkcraft.artorias.mixin;
 
 import com.darkcraft.artorias.client.GroundSlamClient;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
+import net.minecraft.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -11,10 +11,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(PlayerEntityModel.class)
 public class PlayerEntityModelMixin {
 
-    @Inject(method = "setAngles(Lnet/minecraft/client/render/entity/state/PlayerEntityRenderState;)V", at = @At("TAIL"))
-    private void artorias$applySlamAnimations(PlayerEntityRenderState state, CallbackInfo ci) {
-        PlayerEntityModel model = (PlayerEntityModel) (Object) this;
-        int entityId = state.id;
+    @Inject(method = "setAngles(Lnet/minecraft/entity/LivingEntity;FFFFF)V", at = @At("TAIL"))
+    private void artorias$applySlamAnimations(LivingEntity entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch, CallbackInfo ci) {
+        PlayerEntityModel<?> model = (PlayerEntityModel<?>) (Object) this;
+        int entityId = entity.getId();
 
         if (GroundSlamClient.isSlamming(entityId)) {
             // Dark Souls / Elden Ring Plunge Attack downward dive pose
@@ -48,7 +48,7 @@ public class PlayerEntityModelMixin {
             model.body.pitch = 0.65f;
             model.head.pitch = 0.15f;
             model.rightLeg.pitch = -1.10f;
-            model.leftLeg.pitch = 0.85f;
+            model.leftLeg.pitch = -0.80f;
         }
     }
 }

@@ -5,7 +5,7 @@ import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.model.EntityModelPartNames;
 import net.minecraft.util.math.MathHelper;
 
-public class OmenModel extends BipedEntityModel<OmenRenderState> {
+public class OmenModel extends BipedEntityModel<OmenEntity> {
     private final ModelPart horns;
     private final ModelPart cleaver;
     private final ModelPart belly;
@@ -29,41 +29,39 @@ public class OmenModel extends BipedEntityModel<OmenRenderState> {
                         .uv(14, 32).cuboid(-7.5f, -10.0f, 1.0f, 2.0f, 5.0f, 2.0f)
                         // Left curled horn
                         .uv(0, 32).cuboid(4.0f, -7.0f, -2.0f, 2.0f, 4.0f, 5.0f)
-                        .uv(14, 32).cuboid(5.5f, -10.0f, 1.0f, 2.0f, 5.0f, 2.0f)
-                        // Forehead horn stubs
-                        .uv(22, 32).cuboid(-1.5f, -9.0f, -4.5f, 3.0f, 3.0f, 2.0f),
-                ModelTransform.origin(0.0f, 0.0f, 0.0f));
+                        .uv(14, 32).cuboid(5.5f, -10.0f, 1.0f, 2.0f, 5.0f, 2.0f),
+                ModelTransform.pivot(0.0f, 0.0f, 0.0f));
 
-        // 2. Bulky Omen Torso with protruding heavy belly
+        // 2. Heavy bloated belly
         ModelPartData body = root.getChild(EntityModelPartNames.BODY);
         body.addChild("belly", ModelPartBuilder.create()
-                        .uv(32, 32).cuboid(-4.5f, 2.0f, -3.5f, 9.0f, 8.0f, 3.0f),
-                ModelTransform.origin(0.0f, 0.0f, 0.0f));
+                        .uv(24, 32).cuboid(-4.5f, 3.0f, -3.5f, 9.0f, 7.0f, 3.0f, new Dilation(0.1f)),
+                ModelTransform.pivot(0.0f, 0.0f, 0.0f));
 
-        // 3. Giant Greatcleaver attached to Right Arm
+        // 3. Huge jagged Omen Cleaver on right arm
         ModelPartData rightArm = root.getChild(EntityModelPartNames.RIGHT_ARM);
         rightArm.addChild("cleaver", ModelPartBuilder.create()
-                        // Cleaver handle
-                        .uv(0, 48).cuboid(-1.0f, 8.0f, -2.0f, 2.0f, 12.0f, 2.0f)
-                        // Massive curved rusty blade
-                        .uv(8, 44).cuboid(-1.5f, 10.0f, -12.0f, 3.0f, 10.0f, 10.0f),
-                ModelTransform.origin(0.0f, 0.0f, 0.0f));
+                        // Handle
+                        .uv(48, 16).cuboid(-1.0f, 9.0f, -1.0f, 2.0f, 10.0f, 2.0f)
+                        // Massive wide serrated blade
+                        .uv(48, 0).cuboid(-1.5f, -12.0f, -5.0f, 3.0f, 22.0f, 6.0f),
+                ModelTransform.pivot(0.0f, 0.0f, 0.0f));
 
         return TexturedModelData.of(modelData, 64, 64);
     }
 
     @Override
-    public void setAngles(OmenRenderState state) {
-        super.setAngles(state);
+    public void setAngles(OmenEntity entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) {
+        super.setAngles(entity, limbAngle, limbDistance, animationProgress, headYaw, headPitch);
 
         // Hide cleaver if brawler
-        this.cleaver.visible = (state.variant == OmenEntity.Variant.CLEAVER);
+        this.cleaver.visible = (entity.getVariant() == OmenEntity.Variant.CLEAVER);
 
         // Heavy brutish hunch
         this.body.pitch += 0.12f;
         this.head.pitch += 0.08f;
 
-        if (state.isStaggered) {
+        if (entity.isStaggered()) {
             // Staggered onto one knee
             this.body.pitch = 0.55f;
             this.head.pitch = 0.75f;
@@ -71,8 +69,8 @@ public class OmenModel extends BipedEntityModel<OmenRenderState> {
             this.leftArm.pitch = 0.6f;
             this.rightLeg.pitch = -1.2f;
             this.leftLeg.pitch = 0.6f;
-        } else if (state.attackState == OmenEntity.STATE_OVERHEAD_SLAM) {
-            float progress = MathHelper.clamp(state.attackTicks / 26.0f, 0.0f, 1.0f);
+        } else if (entity.getAttackState() == OmenEntity.STATE_OVERHEAD_SLAM) {
+            float progress = MathHelper.clamp(entity.getAttackTicks() / 26.0f, 0.0f, 1.0f);
             if (progress > 0.35f) {
                 // Raising cleaver with both hands
                 this.rightArm.pitch = -2.6f;
@@ -87,13 +85,13 @@ public class OmenModel extends BipedEntityModel<OmenRenderState> {
                 this.body.pitch = 0.45f;
                 this.head.pitch = 0.35f;
             }
-        } else if (state.attackState == OmenEntity.STATE_KICK) {
+        } else if (entity.getAttackState() == OmenEntity.STATE_KICK) {
             this.rightLeg.pitch = -1.5f;
             this.body.pitch = -0.3f;
-        } else if (state.attackState == OmenEntity.STATE_STOMP) {
-            float stompProg = MathHelper.sin(state.attackTicks * 0.4f);
+        } else if (entity.getAttackState() == OmenEntity.STATE_STOMP) {
+            float stompProg = MathHelper.sin(entity.getAttackTicks() * 0.4f);
             this.rightLeg.pitch = -stompProg * 0.8f;
-        } else if (state.attackState == OmenEntity.STATE_CURSED_BREATH) {
+        } else if (entity.getAttackState() == OmenEntity.STATE_CURSED_BREATH) {
             this.body.pitch = 0.42f;
             this.head.pitch = -0.1f;
             this.rightArm.pitch = 0.5f;
