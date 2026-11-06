@@ -1,6 +1,6 @@
 package com.darkcraft.artorias.item;
 
-import com.darkcraft.artorias.entity.ArtoriasEntity;
+import com.darkcraft.artorias.entity.artorias.ArtoriasEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;

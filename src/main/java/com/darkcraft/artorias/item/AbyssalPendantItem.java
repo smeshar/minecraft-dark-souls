@@ -1,7 +1,7 @@
 package com.darkcraft.artorias.item;
 
 import com.darkcraft.artorias.ArtoriasMod;
-import com.darkcraft.artorias.entity.ArtoriasEntity;
+import com.darkcraft.artorias.entity.artorias.ArtoriasEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemUsageContext;
