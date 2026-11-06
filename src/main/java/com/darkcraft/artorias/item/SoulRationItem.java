@@ -58,4 +58,3 @@ public class SoulRationItem extends Item {
         super.appendTooltip(stack, context, displayComponent, textConsumer, type);
     }
 }
-

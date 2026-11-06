@@ -9,4 +9,3 @@ public class OmenRenderState extends BipedEntityRenderState {
     public OmenEntity.Variant variant = OmenEntity.Variant.CLEAVER;
     public float ageInTicks = 0.0f;
 }
-

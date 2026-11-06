@@ -87,4 +87,3 @@ public class GoblinModel extends BipedEntityModel<GoblinRenderState> {
         }
     }
 }
-

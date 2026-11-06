@@ -44,4 +44,3 @@ public class WargRenderer extends MobEntityRenderer<WargEntity, WargRenderState,
         return state.isGiant ? GIANT_TEXTURE : LESSER_TEXTURE;
     }
 }
-
