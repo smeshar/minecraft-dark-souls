@@ -1,7 +1,7 @@
 package com.darkcraft.artorias;
 
 import com.darkcraft.artorias.combat.CombatEventListener;
-import com.darkcraft.artorias.entity.ArtoriasEntity;
+import com.darkcraft.artorias.entity.artorias.ArtoriasEntity;
 import com.darkcraft.artorias.entity.goblin.GoblinEntity;
 import com.darkcraft.artorias.entity.goblin.GoblinKnightEntity;
 import com.darkcraft.artorias.entity.omen.OmenEntity;

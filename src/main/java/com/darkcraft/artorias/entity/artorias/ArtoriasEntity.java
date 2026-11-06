@@ -1,4 +1,4 @@
-package com.darkcraft.artorias.entity;
+package com.darkcraft.artorias.entity.artorias;
 
 import com.darkcraft.artorias.ArtoriasMod;
 import net.minecraft.entity.Entity;
