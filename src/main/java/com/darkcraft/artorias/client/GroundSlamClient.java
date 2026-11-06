@@ -30,7 +30,6 @@ public class GroundSlamClient {
     private static int clientCooldown = 0;
     private static boolean clientIsSlamming = false;
     private static int clientShakeTicks = 0;
-    private static boolean wasCtrlDown = false;
 
     // Track other players' animation states (for multiplayer)
     private static final Map<Integer, Integer> SLAMMING_ENTITIES = new ConcurrentHashMap<>();
@@ -130,15 +129,8 @@ public class GroundSlamClient {
             }
         }
 
-        // 5. Input Detection for Ground Slam (Ctrl in mid-air)
-        boolean ctrlPressed = InputUtil.isKeyPressed(client.getWindow(), GLFW.GLFW_KEY_LEFT_CONTROL)
-                || InputUtil.isKeyPressed(client.getWindow(), GLFW.GLFW_KEY_RIGHT_CONTROL);
-        boolean ctrlJustPressed = ctrlPressed && !wasCtrlDown;
-        wasCtrlDown = ctrlPressed;
-
-        boolean keyTriggered = slamKeyBinding.wasPressed() || ctrlJustPressed;
-
-        if (keyTriggered) {
+        // 5. Input Detection for Ground Slam (only bound key)
+        while (slamKeyBinding.wasPressed()) {
             if (clientCooldown <= 0
                     && !player.isOnGround()
                     && !player.isClimbing()
@@ -314,7 +306,15 @@ public class GroundSlamClient {
                 context.fill(x + 2, y + 2, x + widgetWidth - 2, y + widgetHeight - 2, 0x60005577);
                 drawBorder(context, x, y, widgetWidth, widgetHeight, borderColor);
 
-                String text = "⚡ [CTRL] SLAM";
+                String keyText = slamKeyBinding.getBoundKeyLocalizedText().getString().toUpperCase(java.util.Locale.ROOT);
+                if (keyText.contains("CONTROL") || keyText.contains("CTRL")) {
+                    keyText = "CTRL";
+                } else if (keyText.contains("SHIFT")) {
+                    keyText = "SHIFT";
+                } else if (keyText.contains("ALT")) {
+                    keyText = "ALT";
+                }
+                String text = "⚡ [" + keyText + "] SLAM";
                 int textX = x + (widgetWidth - client.textRenderer.getWidth(text)) / 2;
                 int textY = y + 4;
                 context.drawTextWithShadow(client.textRenderer, text, textX, textY, 0xFF00FFFF);
