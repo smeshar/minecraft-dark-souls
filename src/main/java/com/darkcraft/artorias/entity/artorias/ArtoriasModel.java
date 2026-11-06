@@ -6,7 +6,6 @@ import net.minecraft.client.render.entity.model.EntityModelPartNames;
 import net.minecraft.util.math.MathHelper;
 
 public class ArtoriasModel extends BipedEntityModel<ArtoriasRenderState> {
-    private final ModelPart visor;
     private final ModelPart helmetCrest;
     private final ModelPart plumeSocket;
     private final ModelPart plumeUpper;
@@ -23,7 +22,6 @@ public class ArtoriasModel extends BipedEntityModel<ArtoriasRenderState> {
 
     public ArtoriasModel(ModelPart root) {
         super(root);
-        this.visor = this.head.getChild("visor");
         this.helmetCrest = this.head.getChild("helmet_crest");
         this.plumeSocket = this.head.getChild("plume_socket");
         this.plumeUpper = this.head.getChild("plume_upper");
@@ -46,29 +44,23 @@ public class ArtoriasModel extends BipedEntityModel<ArtoriasRenderState> {
         // 1. Knight of Gwyn / Wolf Knight Helmet & Crest
         ModelPartData head = root.getChild(EntityModelPartNames.HEAD);
 
-        // Pointed houndskull / wolf-snout visor protruding forward with dark eye slit
-        head.addChild("visor", ModelPartBuilder.create()
-                        .uv(48, 48)
-                        .cuboid(-3.0f, -6.0f, -5.5f, 6.0f, 4.0f, 2.0f),
-                ModelTransform.origin(0.0f, 0.0f, 0.0f));
-
-        // Gothic steel central ridge crest running along the skull
+        // Tall, elegant curved gothic crest fin along the skull midline (matching reference concept art)
         head.addChild("helmet_crest", ModelPartBuilder.create()
-                        .uv(48, 55)
-                        .cuboid(-1.0f, -9.0f, -4.0f, 2.0f, 2.0f, 6.0f),
+                        .uv(48, 48)
+                        .cuboid(-0.5f, -12.5f, -2.5f, 1.0f, 5.0f, 5.0f),
                 ModelTransform.origin(0.0f, 0.0f, 0.0f));
 
         // Plume mount socket on top-rear of helmet
         head.addChild("plume_socket", ModelPartBuilder.create()
                         .uv(58, 42)
-                        .cuboid(-0.5f, -9.0f, 2.0f, 1.0f, 2.0f, 1.0f),
+                        .cuboid(-0.5f, -8.5f, 2.0f, 1.0f, 2.0f, 1.0f),
                 ModelTransform.origin(0.0f, 0.0f, 0.0f));
 
         // Artorias iconic flowing mane / ponytail cascading down the back of the helmet & spine
         ModelPartData plumeUpper = head.addChild("plume_upper", ModelPartBuilder.create()
                         .uv(0, 48)
                         .cuboid(-1.5f, 0.0f, 0.0f, 3.0f, 5.0f, 2.0f),
-                ModelTransform.origin(0.0f, -8.0f, 3.5f));
+                ModelTransform.origin(0.0f, -8.0f, 2.5f));
 
         plumeUpper.addChild("plume_lower", ModelPartBuilder.create()
                         .uv(0, 56)
@@ -78,10 +70,10 @@ public class ArtoriasModel extends BipedEntityModel<ArtoriasRenderState> {
         // 2. Torso: Tattered Royal Blue Cowl, Cape, and Knight Surcoat Tabards
         ModelPartData body = root.getChild(EntityModelPartNames.BODY);
 
-        // Bulky tattered cowl/mantle wrapped around the neck and collarbone
+        // Draped royal blue mantle around the neck and across the left shoulder
         body.addChild("cowl", ModelPartBuilder.create()
                         .uv(0, 32)
-                        .cuboid(-4.0f, -0.5f, -2.0f, 8.0f, 3.0f, 4.0f, new Dilation(0.35f)),
+                        .cuboid(-4.0f, -0.5f, -2.0f, 8.0f, 3.0f, 4.0f, new Dilation(0.25f)),
                 ModelTransform.origin(0.0f, 0.0f, 0.0f));
 
         // Tattered knight cloak flowing down the spine to knee-level
@@ -90,7 +82,7 @@ public class ArtoriasModel extends BipedEntityModel<ArtoriasRenderState> {
                         .cuboid(-4.0f, 0.0f, 0.0f, 8.0f, 14.0f, 1.0f),
                 ModelTransform.origin(0.0f, 1.0f, 2.0f));
 
-        // Front surcoat / tabard hanging from belt over thighs
+        // Front surcoat / tabard with chainmail hanging over thighs
         body.addChild("tabard_front", ModelPartBuilder.create()
                         .uv(0, 40)
                         .cuboid(-2.5f, 0.0f, 0.0f, 5.0f, 6.0f, 1.0f),
@@ -106,7 +98,7 @@ public class ArtoriasModel extends BipedEntityModel<ArtoriasRenderState> {
         ModelPartData rightArm = root.getChild(EntityModelPartNames.RIGHT_ARM);
         rightArm.addChild("pauldron", ModelPartBuilder.create()
                         .uv(48, 32)
-                        .cuboid(-3.5f, -2.5f, -2.0f, 4.0f, 4.0f, 4.0f, new Dilation(0.3f)),
+                        .cuboid(-3.5f, -2.5f, -2.0f, 4.0f, 4.0f, 4.0f, new Dilation(0.25f)),
                 ModelTransform.origin(0.0f, 0.0f, 0.0f));
 
         // Upward flared haute-piece neck guard flange
@@ -119,20 +111,20 @@ public class ArtoriasModel extends BipedEntityModel<ArtoriasRenderState> {
         ModelPartData leftArm = root.getChild(EntityModelPartNames.LEFT_ARM);
         leftArm.addChild("left_corruption", ModelPartBuilder.create()
                         .uv(12, 40)
-                        .cuboid(-0.5f, -2.5f, -1.5f, 3.0f, 3.0f, 3.0f, new Dilation(0.2f)),
+                        .cuboid(-0.5f, -2.5f, -1.5f, 3.0f, 3.0f, 3.0f, new Dilation(0.15f)),
                 ModelTransform.origin(0.0f, 0.0f, 0.0f));
 
-        // 5. Slender Knight Legs: Sharp Pointed Gothic Knee Poleyns
+        // 5. Slender Knight Legs: Pointed Gothic Knee Poleyns
         ModelPartData rightLeg = root.getChild(EntityModelPartNames.RIGHT_LEG);
         rightLeg.addChild("knee", ModelPartBuilder.create()
                         .uv(42, 32)
-                        .cuboid(-1.0f, 3.5f, -2.8f, 2.0f, 3.0f, 1.0f),
+                        .cuboid(-1.0f, 3.5f, -2.5f, 2.0f, 3.0f, 1.0f),
                 ModelTransform.origin(0.0f, 0.0f, 0.0f));
 
         ModelPartData leftLeg = root.getChild(EntityModelPartNames.LEFT_LEG);
         leftLeg.addChild("knee", ModelPartBuilder.create()
                         .uv(42, 32)
-                        .cuboid(-1.0f, 3.5f, -2.8f, 2.0f, 3.0f, 1.0f),
+                        .cuboid(-1.0f, 3.5f, -2.5f, 2.0f, 3.0f, 1.0f),
                 ModelTransform.origin(0.0f, 0.0f, 0.0f));
 
         return TexturedModelData.of(modelData, 64, 64);
