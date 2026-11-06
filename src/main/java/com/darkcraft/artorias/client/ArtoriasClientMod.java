@@ -7,6 +7,7 @@ import com.darkcraft.artorias.entity.artorias.ArtoriasRenderer;
 import com.darkcraft.artorias.entity.goblin.GoblinModel;
 import com.darkcraft.artorias.entity.goblin.GoblinRenderer;
 import com.darkcraft.artorias.entity.margit.MargitDaggerRenderer;
+import com.darkcraft.artorias.entity.margit.MargitModel;
 import com.darkcraft.artorias.entity.margit.MargitRenderer;
 import com.darkcraft.artorias.entity.omen.OmenModel;
 import com.darkcraft.artorias.entity.omen.OmenRenderer;
@@ -57,7 +58,8 @@ public class ArtoriasClientMod implements ClientModInitializer {
         EntityRendererRegistry.register(ArtoriasMod.GOBLIN_ENTITY, GoblinRenderer::new);
         EntityRendererRegistry.register(ArtoriasMod.GOBLIN_KNIGHT_ENTITY, GoblinRenderer::new);
 
-        // Register Margit, the Fell Omen GeckoLib Boss & Dagger Renderers
+        // Register Margit, the Fell Omen Boss & Dagger Renderers
+        EntityModelLayerRegistry.registerModelLayer(MargitRenderer.MARGIT_LAYER, MargitModel::getTexturedModelData);
         EntityRendererRegistry.register(ArtoriasMod.MARGIT_ENTITY, MargitRenderer::new);
         EntityRendererRegistry.register(ArtoriasMod.MARGIT_DAGGER_ENTITY, MargitDaggerRenderer::new);
 

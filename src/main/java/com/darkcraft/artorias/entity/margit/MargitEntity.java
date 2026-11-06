@@ -33,13 +33,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.PlayState;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.List;
 
@@ -49,7 +42,7 @@ import java.util.List;
  * dynamic phase 2 transition with spectral golden hammer & sword,
  * and adaptive AI response to player positioning (tail swipe on behind-rolls).
  */
-public class MargitEntity extends HostileEntity implements GeoEntity {
+public class MargitEntity extends HostileEntity {
 
     public static final float MAX_POISE = 120.0f;
     private static final int POISE_RECOVERY_DELAY = 100; // 5 seconds (100 ticks)
@@ -59,8 +52,6 @@ public class MargitEntity extends HostileEntity implements GeoEntity {
     private static final TrackedData<Boolean> PHASE_TWO = DataTracker.registerData(MargitEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Float> POISE = DataTracker.registerData(MargitEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static final TrackedData<Integer> SHACKLE_USES = DataTracker.registerData(MargitEntity.class, TrackedDataHandlerRegistry.INTEGER);
-
-    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     private final ServerBossBar bossBar = new ServerBossBar(
             Text.translatable("entity.artorias.margit_the_fell_omen"),
@@ -488,52 +479,5 @@ public class MargitEntity extends HostileEntity implements GeoEntity {
     public void onStoppedTrackingBy(ServerPlayerEntity player) {
         super.onStoppedTrackingBy(player);
         this.bossBar.removePlayer(player);
-    }
-
-    // ==========================================
-    // GeckoLib 4 Animatable Implementation
-    // ==========================================
-
-    @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        // Base movement controller: handles walking and idle
-        controllers.add(new AnimationController<>(this, "movementController", 5, event -> {
-            if (getAttackState() != MargitAttackState.IDLE) {
-                return PlayState.STOP;
-            }
-            if (event.isMoving()) {
-                return event.setAndContinue(RawAnimation.begin().thenLoop("animation.margit.walk"));
-            }
-            return event.setAndContinue(RawAnimation.begin().thenLoop("animation.margit.idle"));
-        }));
-
-        // Dynamic attack & reaction controller: drives frame-accurate attack states
-        controllers.add(new AnimationController<>(this, "attackController", 2, event -> {
-            MargitAttackState state = getAttackState();
-            if (state == MargitAttackState.IDLE) {
-                return PlayState.STOP;
-            }
-
-            // Map each attack/special state to its raw animation
-            switch (state) {
-                case STAFF_SWING_COMBO -> event.setAndContinue(RawAnimation.begin().thenPlay("animation.margit.staff_swing_combo"));
-                case STAFF_LEAP -> event.setAndContinue(RawAnimation.begin().thenPlay("animation.margit.staff_leap"));
-                case DAGGER_TOSS -> event.setAndContinue(RawAnimation.begin().thenPlay("animation.margit.dagger_toss"));
-                case TAIL_SWIPE -> event.setAndContinue(RawAnimation.begin().thenPlay("animation.margit.tail_swipe"));
-                case HAMMER_SLAM -> event.setAndContinue(RawAnimation.begin().thenPlay("animation.margit.hammer_slam"));
-                case PHASE_TRANSITION -> event.setAndContinue(RawAnimation.begin().thenPlay("animation.margit.phase2_roar"));
-                case STUNNED -> event.setAndContinue(RawAnimation.begin().thenPlay("animation.margit.stunned"));
-                case PINNED -> event.setAndContinue(RawAnimation.begin().thenPlay("animation.margit.pinned"));
-                default -> {
-                    return PlayState.STOP;
-                }
-            }
-            return PlayState.CONTINUE;
-        }));
-    }
-
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return this.cache;
     }
 }
