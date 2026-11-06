@@ -44,3 +44,4 @@ public class GoblinRenderer extends BipedEntityRenderer<GoblinEntity, GoblinRend
         return state.isKnight ? GOBLIN_KNIGHT_TEXTURE : GOBLIN_TEXTURE;
     }
 }
+

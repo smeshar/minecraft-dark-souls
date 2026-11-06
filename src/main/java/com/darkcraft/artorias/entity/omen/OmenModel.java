@@ -101,3 +101,4 @@ public class OmenModel extends BipedEntityModel<OmenRenderState> {
         }
     }
 }
+

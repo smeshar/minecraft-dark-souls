@@ -8,3 +8,4 @@ public class GoblinRenderState extends BipedEntityRenderState {
     public boolean isKnight = false;
     public float ageInTicks = 0.0f;
 }
+

@@ -8,3 +8,4 @@ public class WargRenderState extends LivingEntityRenderState {
     public boolean isGiant = false;
     public float ageInTicks = 0.0f;
 }
+

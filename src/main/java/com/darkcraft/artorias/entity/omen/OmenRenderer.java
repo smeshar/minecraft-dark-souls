@@ -42,3 +42,4 @@ public class OmenRenderer extends BipedEntityRenderer<OmenEntity, OmenRenderStat
         return state.variant == OmenEntity.Variant.CLEAVER ? CLEAVER_TEXTURE : BRAWLER_TEXTURE;
     }
 }
+
