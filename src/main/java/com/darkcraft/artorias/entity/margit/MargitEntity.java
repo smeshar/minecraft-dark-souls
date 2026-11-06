@@ -117,11 +117,15 @@ public class MargitEntity extends HostileEntity implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "movement", 5, this::movementPredicate));
-        controllers.add(new AnimationController<>(this, "attack", 2, this::attackPredicate));
+        controllers.add(new AnimationController<>(this, "movement", 3, this::movementPredicate));
+        controllers.add(new AnimationController<>(this, "attack", 1, this::attackPredicate));
     }
 
     private PlayState movementPredicate(AnimationState<MargitEntity> state) {
+        // Prevent movement controller from overriding or blending over active attack animations
+        if (getAttackState() != MargitAttackState.IDLE) {
+            return PlayState.STOP;
+        }
         if (state.isMoving()) {
             return state.setAndContinue(RawAnimation.begin().thenLoop("animation.margit.walk"));
         }
@@ -134,6 +138,14 @@ public class MargitEntity extends HostileEntity implements GeoEntity {
             return state.setAndContinue(RawAnimation.begin().thenPlay(attack.getAnimationName()));
         }
         return PlayState.STOP;
+    }
+
+    @Override
+    public void takeKnockback(double strength, double x, double z) {
+        // Boss Hyperarmor: Margit resists all standard attack knockback, only knocked back when poise is broken
+        if (isStunned()) {
+            super.takeKnockback(strength, x, z);
+        }
     }
 
     @Override
@@ -344,9 +356,19 @@ public class MargitEntity extends HostileEntity implements GeoEntity {
             return false;
         }
 
+        // Preserve velocity across damage events to guarantee hyperarmor on active attacks
+        Vec3d prevVelocity = this.getVelocity();
+        MargitAttackState prevAttack = getAttackState();
+
         boolean damaged = super.damage(source, amount);
         if (damaged) {
             timeSinceLastHit = 0;
+
+            // Hyperarmor: retain attack leap/slam momentum against player knockback attacks
+            if (prevAttack != MargitAttackState.IDLE && !isStunned() && !isPinned()) {
+                this.setVelocity(prevVelocity);
+                this.velocityModified = true;
+            }
 
             // Calculate poise damage based on weapon type
             float poiseDamage = 12.0f;

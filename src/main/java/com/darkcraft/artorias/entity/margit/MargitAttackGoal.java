@@ -71,15 +71,13 @@ public class MargitAttackGoal extends Goal {
 
         // =========================================================================
         // 1. Reactive Anti-Behind Counter: Tail Swipe check
-        // If player is strictly behind boss (dot < -0.45) within 4.5 blocks,
-        // Margit immediately cancels current action or wind-up and performs TAIL_SWIPE!
+        // If player is behind boss (dot < -0.45) within 4.5 blocks while IDLE,
+        // Margit quickly punishes flankers with TAIL_SWIPE.
+        // Active attacks have boss hyperarmor and are never interrupted or cancelled.
         // =========================================================================
-        if (dotProduct < -0.45 && dist <= 4.5 && currentState != MargitAttackState.TAIL_SWIPE) {
-            // Cancel any idle or combo wind-up into tail swipe
-            if (currentState == MargitAttackState.IDLE || currentState == MargitAttackState.STAFF_SWING_COMBO) {
-                initiateAttack(MargitAttackState.TAIL_SWIPE);
-                return;
-            }
+        if (dotProduct < -0.45 && dist <= 4.5 && currentState == MargitAttackState.IDLE) {
+            initiateAttack(MargitAttackState.TAIL_SWIPE);
+            return;
         }
 
         // =========================================================================
