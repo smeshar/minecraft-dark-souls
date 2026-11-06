@@ -4,11 +4,14 @@ import com.darkcraft.artorias.combat.CombatEventListener;
 import com.darkcraft.artorias.entity.artorias.ArtoriasEntity;
 import com.darkcraft.artorias.entity.goblin.GoblinEntity;
 import com.darkcraft.artorias.entity.goblin.GoblinKnightEntity;
+import com.darkcraft.artorias.entity.margit.MargitDaggerEntity;
+import com.darkcraft.artorias.entity.margit.MargitEntity;
 import com.darkcraft.artorias.entity.omen.OmenEntity;
 import com.darkcraft.artorias.entity.warg.WargEntity;
 import com.darkcraft.artorias.item.AbyssalPendantItem;
 import com.darkcraft.artorias.item.ArtoriasGreatswordItem;
 import com.darkcraft.artorias.item.ArtoriasHelmItem;
+import com.darkcraft.artorias.item.MargitShackleItem;
 import com.darkcraft.artorias.item.SoulRationItem;
 import com.darkcraft.artorias.network.ModMessages;
 import net.fabricmc.api.ModInitializer;
@@ -59,6 +62,8 @@ public class ArtoriasMod implements ModInitializer {
     public static final RegistryKey<EntityType<?>> OMEN_BRAWLER_KEY = RegistryKey.of(RegistryKeys.ENTITY_TYPE, id("omen_brawler"));
     public static final RegistryKey<EntityType<?>> GOBLIN_KEY = RegistryKey.of(RegistryKeys.ENTITY_TYPE, id("goblin"));
     public static final RegistryKey<EntityType<?>> GOBLIN_KNIGHT_KEY = RegistryKey.of(RegistryKeys.ENTITY_TYPE, id("goblin_knight"));
+    public static final RegistryKey<EntityType<?>> MARGIT_KEY = RegistryKey.of(RegistryKeys.ENTITY_TYPE, id("margit_the_fell_omen"));
+    public static final RegistryKey<EntityType<?>> MARGIT_DAGGER_KEY = RegistryKey.of(RegistryKeys.ENTITY_TYPE, id("margit_spectral_dagger"));
 
     // Entities
     public static final EntityType<ArtoriasEntity> ARTORIAS_ENTITY = Registry.register(
@@ -124,6 +129,25 @@ public class ArtoriasMod implements ModInitializer {
                     .build(GOBLIN_KNIGHT_KEY)
     );
 
+    public static final EntityType<MargitEntity> MARGIT_ENTITY = Registry.register(
+            Registries.ENTITY_TYPE,
+            MARGIT_KEY,
+            EntityType.Builder.create(MargitEntity::new, SpawnGroup.MONSTER)
+                    .dimensions(1.4f, 3.2f)
+                    .maxTrackingRange(24)
+                    .build(MARGIT_KEY)
+    );
+
+    public static final EntityType<MargitDaggerEntity> MARGIT_DAGGER_ENTITY = Registry.register(
+            Registries.ENTITY_TYPE,
+            MARGIT_DAGGER_KEY,
+            EntityType.Builder.<MargitDaggerEntity>create(MargitDaggerEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.4f, 0.4f)
+                    .maxTrackingRange(16)
+                    .trackingTickInterval(1)
+                    .build(MARGIT_DAGGER_KEY)
+    );
+
     // Item Keys
     public static final RegistryKey<Item> ARTORIAS_GREATSWORD_KEY = RegistryKey.of(RegistryKeys.ITEM, id("artorias_greatsword"));
     public static final RegistryKey<Item> ABYSSAL_PENDANT_KEY = RegistryKey.of(RegistryKeys.ITEM, id("abyssal_pendant"));
@@ -131,6 +155,7 @@ public class ArtoriasMod implements ModInitializer {
     public static final RegistryKey<Item> ARTORIAS_HELM_KEY = RegistryKey.of(RegistryKeys.ITEM, id("artorias_helm"));
     public static final RegistryKey<EquipmentAsset> ARTORIAS_HELM_ASSET_KEY = RegistryKey.of(EquipmentAssetKeys.REGISTRY_KEY, id("artorias_helm"));
     public static final RegistryKey<Item> SOUL_RATION_KEY = RegistryKey.of(RegistryKeys.ITEM, id("soul_ration"));
+    public static final RegistryKey<Item> MARGIT_SHACKLE_KEY = RegistryKey.of(RegistryKeys.ITEM, id("margits_shackle"));
 
     // Spawn Egg Keys
     public static final RegistryKey<Item> GIANT_WARG_SPAWN_EGG_KEY = RegistryKey.of(RegistryKeys.ITEM, id("giant_warg_spawn_egg"));
@@ -139,6 +164,7 @@ public class ArtoriasMod implements ModInitializer {
     public static final RegistryKey<Item> OMEN_BRAWLER_SPAWN_EGG_KEY = RegistryKey.of(RegistryKeys.ITEM, id("omen_brawler_spawn_egg"));
     public static final RegistryKey<Item> GOBLIN_SPAWN_EGG_KEY = RegistryKey.of(RegistryKeys.ITEM, id("goblin_spawn_egg"));
     public static final RegistryKey<Item> GOBLIN_KNIGHT_SPAWN_EGG_KEY = RegistryKey.of(RegistryKeys.ITEM, id("goblin_knight_spawn_egg"));
+    public static final RegistryKey<Item> MARGIT_SPAWN_EGG_KEY = RegistryKey.of(RegistryKeys.ITEM, id("margit_spawn_egg"));
 
     // Items
     public static final Item ARTORIAS_GREATSWORD = Registry.register(
@@ -229,6 +255,18 @@ public class ArtoriasMod implements ModInitializer {
             new SpawnEggItem(new Item.Settings().spawnEgg(GOBLIN_KNIGHT_ENTITY).registryKey(GOBLIN_KNIGHT_SPAWN_EGG_KEY))
     );
 
+    public static final Item MARGIT_SHACKLE = Registry.register(
+            Registries.ITEM,
+            MARGIT_SHACKLE_KEY,
+            new MargitShackleItem(new Item.Settings().registryKey(MARGIT_SHACKLE_KEY).maxCount(1).rarity(Rarity.EPIC))
+    );
+
+    public static final Item MARGIT_SPAWN_EGG = Registry.register(
+            Registries.ITEM,
+            MARGIT_SPAWN_EGG_KEY,
+            new SpawnEggItem(new Item.Settings().spawnEgg(MARGIT_ENTITY).registryKey(MARGIT_SPAWN_EGG_KEY))
+    );
+
     @Override
     public void onInitialize() {
         LOGGER.info("Knight Artorias Mod initialized! Prepare for Dark Souls combat!");
@@ -241,6 +279,7 @@ public class ArtoriasMod implements ModInitializer {
         FabricDefaultAttributeRegistry.register(OMEN_BRAWLER_ENTITY, OmenEntity.createBrawlerAttributes());
         FabricDefaultAttributeRegistry.register(GOBLIN_ENTITY, GoblinEntity.createGoblinAttributes());
         FabricDefaultAttributeRegistry.register(GOBLIN_KNIGHT_ENTITY, GoblinKnightEntity.createGoblinKnightAttributes());
+        FabricDefaultAttributeRegistry.register(MARGIT_ENTITY, MargitEntity.createAttributes());
 
         // Register Natural World Spawning
         registerSpawnRestrictions();
@@ -255,6 +294,7 @@ public class ArtoriasMod implements ModInitializer {
             entries.add(ABYSSAL_PENDANT);
             entries.add(SOUL_OF_ARTORIAS);
             entries.add(SOUL_RATION);
+            entries.add(MARGIT_SHACKLE);
         });
 
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.FOOD_AND_DRINK).register(entries -> {
@@ -268,6 +308,7 @@ public class ArtoriasMod implements ModInitializer {
             entries.add(OMEN_BRAWLER_SPAWN_EGG);
             entries.add(GOBLIN_SPAWN_EGG);
             entries.add(GOBLIN_KNIGHT_SPAWN_EGG);
+            entries.add(MARGIT_SPAWN_EGG);
         });
     }
 

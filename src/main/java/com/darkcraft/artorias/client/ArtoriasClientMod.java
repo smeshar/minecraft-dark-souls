@@ -6,6 +6,8 @@ import com.darkcraft.artorias.entity.artorias.ArtoriasModel;
 import com.darkcraft.artorias.entity.artorias.ArtoriasRenderer;
 import com.darkcraft.artorias.entity.goblin.GoblinModel;
 import com.darkcraft.artorias.entity.goblin.GoblinRenderer;
+import com.darkcraft.artorias.entity.margit.MargitDaggerRenderer;
+import com.darkcraft.artorias.entity.margit.MargitRenderer;
 import com.darkcraft.artorias.entity.omen.OmenModel;
 import com.darkcraft.artorias.entity.omen.OmenRenderer;
 import com.darkcraft.artorias.entity.warg.WargModel;
@@ -54,6 +56,10 @@ public class ArtoriasClientMod implements ClientModInitializer {
         EntityModelLayerRegistry.registerModelLayer(GoblinRenderer.GOBLIN_LAYER, GoblinModel::getTexturedModelData);
         EntityRendererRegistry.register(ArtoriasMod.GOBLIN_ENTITY, GoblinRenderer::new);
         EntityRendererRegistry.register(ArtoriasMod.GOBLIN_KNIGHT_ENTITY, GoblinRenderer::new);
+
+        // Register Margit, the Fell Omen GeckoLib Boss & Dagger Renderers
+        EntityRendererRegistry.register(ArtoriasMod.MARGIT_ENTITY, MargitRenderer::new);
+        EntityRendererRegistry.register(ArtoriasMod.MARGIT_DAGGER_ENTITY, MargitDaggerRenderer::new);
 
         // Register Ground Slam feature (keybindings, networking, HUD cooldown)
         GroundSlamClient.initClient();
