@@ -6,8 +6,8 @@
 
 <br/>
 
-[![Release](https://img.shields.io/github/v/release/smeshar/minecraft-dark-souls?color=red&logo=github&style=for-the-badge)](https://github.com/smeshar/minecraft-dark-souls/releases/tag/v1.1.1)
-[![Download](https://img.shields.io/badge/Download_JAR-v1.1.1-crimson.svg?style=for-the-badge&logo=curseforge&logoColor=white)](https://github.com/smeshar/minecraft-dark-souls/releases/download/v1.1.1/artorias-boss-1.1.1.jar)
+[![Release](https://img.shields.io/github/v/release/smeshar/minecraft-dark-souls?color=red&logo=github&style=for-the-badge)](https://github.com/smeshar/minecraft-dark-souls/releases/tag/v1.2.0-beta.1)
+[![Download](https://img.shields.io/badge/Download_JAR-v1.2.0--beta.1-crimson.svg?style=for-the-badge&logo=curseforge&logoColor=white)](https://github.com/smeshar/minecraft-dark-souls/releases/download/v1.2.0-beta.1/artorias-boss-1.2.0-beta.1.jar)
 [![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.11-brightgreen.svg?style=for-the-badge&logo=minecraft&logoColor=white)](https://www.minecraft.net/)
 [![Mod Loader](https://img.shields.io/badge/Mod_Loader-Fabric-blue.svg?style=for-the-badge&logo=fabric&logoColor=white)](https://fabricmc.net/)
 [![Fabric API](https://img.shields.io/badge/Fabric_API-0.141.3%2B1.21.11-blueviolet.svg?style=for-the-badge)](https://modrinth.com/mod/fabric-api)
@@ -128,6 +128,7 @@ graph TD
 ### 1. Варги (Мувсет волков из Elden Ring)
 - **Большой варг (`artorias:giant_warg`)** — 60 HP, свирепый гигантский хищник.
 - **Малый варг (`artorias:lesser_warg`)** — 24 HP, быстрый и ловкий охотник.
+- **Естественный спавн:** тайга, горы и густые леса (стаями по 2–4 малых и 1–2 больших варга).
 - **Особенности и атаки:**
   - **Pounce Lunge (Прыжок с наскока):** на дистанции 4–10 блоков варг группируется и совершает стремительный прыжок сквозь воздух, сбивая с ног.
   - **Flanking / Circling (Тактическое окружение):** стая не бежит по прямой, а кружит полукругом вокруг игрока, выжидая момент для удара со спины.
@@ -137,6 +138,7 @@ graph TD
 ### 2. Огры-знамения (Мувсет Знамений из канализации Лейнделла)
 - **Огр-знамение с тесаком (`artorias:omen_cleaver`)** — 140 HP, массивный рогатый громила с гигантским ржавым тесаком.
 - **Бешеный огр-кулачник (`artorias:omen_brawler`)** — 120 HP, свирепый огр в шипованных цестусах.
+- **Естественный спавн:** пещеры, глубь подземелий и ночные пустоши верхнего мира (опасные одиночные громилы).
 - **Особенности и атаки:**
   - **Overhead Cleaver Slam:** замах тесаком обеими руками с сокрушительным падением в землю и ударной волной (AoE взрыв).
   - **Cursed Flame Breath:** наклон вперед и выдыхание конуса тёмного проклятого пламени, поджигающего врагов.
@@ -150,6 +152,7 @@ graph TD
 - **Рыцарь-гоблин (`artorias:goblin_knight`)** — 45 HP, бронированный гоблин в ведре-шлеме с мечом и шипованным баклером.
   - **Shield Guard & Parry Counter:** поднимает щит в стойку защиты. При атаке в щит спереди парирует удар со звуком блока и проводит **мгновенную критическую контратаку (рипост)**!
   - **Shield Bash:** сокрушительный удар щитом, накладывающий замедление.
+- **Естественный спавн:** леса, равнины, болота и пещеры верхнего мира в ночное время (группами по 2–4 лазутчика и 1–2 рыцаря).
 
 ---
 
@@ -158,7 +161,7 @@ graph TD
 Для игры с друзьями **не нужен платный сервер**!
 
 1. **Скопируйте мод:**
-   - Поместите `artorias-boss-1.1.1.jar` в папку `.minecraft/mods` у себя и у всех друзей.
+   - Поместите `artorias-boss-1.2.0-beta.1.jar` в папку `.minecraft/mods` у себя и у всех друзей.
    - Убедитесь, что у всех установлен `fabric-api-0.141.3+1.21.11.jar`.
 2. **Создайте мир:**
    - Зайдите в одиночную игру.
@@ -196,7 +199,7 @@ cd MinecraftDarkSouls
 # Скомпилируйте мод с помощью Gradle Wrapper (требуется Java 21 или Java 25)
 .\gradlew.bat build
 ```
-Готовый `.jar` файл будет создан в папке `build/libs/artorias-boss-1.1.1.jar`.
+Готовый `.jar` файл будет создан в папке `build/libs/artorias-boss-1.2.0-beta.1.jar`.
  
 ---
 

@@ -12,6 +12,8 @@ import com.darkcraft.artorias.item.ArtoriasHelmItem;
 import com.darkcraft.artorias.item.SoulRationItem;
 import com.darkcraft.artorias.network.ModMessages;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
+import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.component.DataComponentTypes;
@@ -22,6 +24,11 @@ import net.minecraft.component.type.FoodComponent;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.SpawnGroup;
+import net.minecraft.entity.SpawnLocationTypes;
+import net.minecraft.entity.SpawnRestriction;
+import net.minecraft.entity.mob.HostileEntity;
+import net.minecraft.registry.tag.BiomeTags;
+import net.minecraft.world.Heightmap;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.Item;
@@ -235,6 +242,10 @@ public class ArtoriasMod implements ModInitializer {
         FabricDefaultAttributeRegistry.register(GOBLIN_ENTITY, GoblinEntity.createGoblinAttributes());
         FabricDefaultAttributeRegistry.register(GOBLIN_KNIGHT_ENTITY, GoblinKnightEntity.createGoblinKnightAttributes());
 
+        // Register Natural World Spawning
+        registerSpawnRestrictions();
+        registerBiomeSpawns();
+
         ModMessages.registerC2SPackets();
         CombatEventListener.register();
 
@@ -258,6 +269,32 @@ public class ArtoriasMod implements ModInitializer {
             entries.add(GOBLIN_SPAWN_EGG);
             entries.add(GOBLIN_KNIGHT_SPAWN_EGG);
         });
+    }
+
+    private static void registerSpawnRestrictions() {
+        SpawnRestriction.register(GIANT_WARG_ENTITY, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, HostileEntity::canSpawnInDark);
+        SpawnRestriction.register(LESSER_WARG_ENTITY, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, HostileEntity::canSpawnInDark);
+        SpawnRestriction.register(OMEN_CLEAVER_ENTITY, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, HostileEntity::canSpawnInDark);
+        SpawnRestriction.register(OMEN_BRAWLER_ENTITY, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, HostileEntity::canSpawnInDark);
+        SpawnRestriction.register(GOBLIN_ENTITY, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, HostileEntity::canSpawnInDark);
+        SpawnRestriction.register(GOBLIN_KNIGHT_ENTITY, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, HostileEntity::canSpawnInDark);
+    }
+
+    private static void registerBiomeSpawns() {
+        // Wargs spawn in Taigas, Mountains, and Forests
+        var wargBiomes = BiomeSelectors.tag(BiomeTags.IS_TAIGA)
+                .or(BiomeSelectors.tag(BiomeTags.IS_MOUNTAIN))
+                .or(BiomeSelectors.tag(BiomeTags.IS_FOREST));
+        BiomeModifications.addSpawn(wargBiomes, SpawnGroup.MONSTER, LESSER_WARG_ENTITY, 35, 2, 4);
+        BiomeModifications.addSpawn(wargBiomes, SpawnGroup.MONSTER, GIANT_WARG_ENTITY, 12, 1, 2);
+
+        // Goblins spawn across all dark Overworld areas (forests, plains, caves)
+        BiomeModifications.addSpawn(BiomeSelectors.tag(BiomeTags.IS_OVERWORLD), SpawnGroup.MONSTER, GOBLIN_ENTITY, 40, 2, 4);
+        BiomeModifications.addSpawn(BiomeSelectors.tag(BiomeTags.IS_OVERWORLD), SpawnGroup.MONSTER, GOBLIN_KNIGHT_ENTITY, 15, 1, 2);
+
+        // Sewer Omens spawn in Overworld dark areas (caves, deep underground, swamps)
+        BiomeModifications.addSpawn(BiomeSelectors.tag(BiomeTags.IS_OVERWORLD), SpawnGroup.MONSTER, OMEN_BRAWLER_ENTITY, 12, 1, 2);
+        BiomeModifications.addSpawn(BiomeSelectors.tag(BiomeTags.IS_OVERWORLD), SpawnGroup.MONSTER, OMEN_CLEAVER_ENTITY, 8, 1, 1);
     }
 
     public static Identifier id(String path) {
