@@ -23,7 +23,8 @@ public class MargitGoldenWeaponLayer extends GeoRenderLayer<MargitEntity> {
 
     @Override
     public void render(MatrixStack poseStack, MargitEntity animatable, BakedGeoModel bakedModel, RenderLayer renderType, VertexConsumerProvider bufferSource, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
-        if (!animatable.isPhaseTwo()) return;
+        boolean isHammerAttack = animatable.getAttackState() == MargitAttackState.HAMMER_SLAM;
+        if (!animatable.isPhaseTwo() && !isHammerAttack) return;
 
         RenderLayer glowLayer = RenderLayer.getEntityTranslucent(WEAPON_TEXTURE);
         VertexConsumer glowConsumer = bufferSource.getBuffer(glowLayer);
