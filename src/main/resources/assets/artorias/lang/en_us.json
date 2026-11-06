@@ -8,7 +8,7 @@
   "item.artorias.artorias_helm": "Helm of Artorias",
   "item.artorias.artorias_helm.desc": "Helm of the Abysswalker. Grants +5 Attack Damage.",
   "key.artorias.dodge_roll": "Dodge Roll (i-frames)",
-  "key.artorias.ground_slam": "Ground Slam (Air + Ctrl)",
+  "key.artorias.ground_slam": "Ground Slam (Air Attack)",
   "category.artorias": "Dark Souls Combat",
   "message.artorias.boss_spawn": "§4[Dark Souls] §cKnight Artorias, the Abysswalker has awakened! Steel yourselves!",
   "message.artorias.stance_break": "§6STANCE BROKEN! Artorias is vulnerable for a CRITICAL RIPOSTE!",

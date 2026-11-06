@@ -8,7 +8,7 @@
   "item.artorias.artorias_helm": "Шлем Арториаса",
   "item.artorias.artorias_helm.desc": "Шлем Путника Бездны. Дарует силу Бездны (+5 к урону).",
   "key.artorias.dodge_roll": "Перекат (кадры неуязвимости)",
-  "key.artorias.ground_slam": "Удар о землю (В воздухе + Ctrl)",
+  "key.artorias.ground_slam": "Удар о землю (В воздухе)",
   "category.artorias": "Dark Souls Боевка",
   "message.artorias.boss_spawn": "§4[Dark Souls] §cРыцарь Арториас Путник Бездны пробудился! Приготовьтесь к бою!",
   "message.artorias.stance_break": "§6СТОЙКА СЛОМАНА! Арториас оглушен — нанесите КРИТИЧЕСКИЙ УДАР!",
