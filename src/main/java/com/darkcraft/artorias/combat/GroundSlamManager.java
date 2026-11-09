@@ -79,10 +79,10 @@ public class GroundSlamManager {
         // Apply high downward velocity with dampened horizontal movement
         Vec3d v = player.getVelocity();
         player.setVelocity(v.x * 0.25, DOWNWARD_SPEED, v.z * 0.25);
-        player.velocityDirty = true;
+        player.velocityModified = true;
         player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(player));
 
-        if (player.getEntityWorld() instanceof ServerWorld sw) {
+        if (player.getWorld() instanceof ServerWorld sw) {
             sw.playSound(null, player.getX(), player.getY(), player.getZ(),
                     SoundEvents.ITEM_MACE_SMASH_AIR, SoundCategory.PLAYERS, 1.4f, 0.95f);
             sw.playSound(null, player.getX(), player.getY(), player.getZ(),
@@ -138,11 +138,11 @@ public class GroundSlamManager {
             // Keep terminal plunge speed
             if (player.getVelocity().y > -1.2) {
                 player.setVelocity(player.getVelocity().x * 0.75, DOWNWARD_SPEED, player.getVelocity().z * 0.75);
-                player.velocityDirty = true;
+                player.velocityModified = true;
             }
 
             // Descent particles
-            if (player.getEntityWorld() instanceof ServerWorld sw) {
+            if (player.getWorld() instanceof ServerWorld sw) {
                 sw.spawnParticles(ParticleTypes.SOUL_FIRE_FLAME, player.getX(), player.getY() + 0.3, player.getZ(), 3, 0.15, 0.25, 0.15, 0.02);
                 sw.spawnParticles(ParticleTypes.SWEEP_ATTACK, player.getX(), player.getY() + 0.35, player.getZ(), 1, 0, 0, 0, 0.0);
                 sw.spawnParticles(ParticleTypes.CLOUD, player.getX(), player.getY() + 0.2, player.getZ(), 2, 0.12, 0.12, 0.12, 0.01);
@@ -157,7 +157,7 @@ public class GroundSlamManager {
 
     private static boolean isTouchingBlockBeneath(ServerPlayerEntity player) {
         Box box = player.getBoundingBox().offset(0, -0.22, 0);
-        return !player.getEntityWorld().isSpaceEmpty(player, box);
+        return !player.getWorld().isSpaceEmpty(player, box);
     }
 
     public static void performImpact(ServerPlayerEntity player) {
@@ -167,11 +167,11 @@ public class GroundSlamManager {
         RECOVERY_TICKS.put(uuid, 8);
         player.fallDistance = 0.0f;
 
-        if (!(player.getEntityWorld() instanceof ServerWorld sw)) {
+        if (!(player.getWorld() instanceof ServerWorld sw)) {
             return;
         }
 
-        Vec3d pos = player.getEntityPos();
+        Vec3d pos = player.getPos();
 
         // 1. Calculate Damage
         float damage = BASE_DAMAGE;
@@ -196,13 +196,13 @@ public class GroundSlamManager {
                     float proximity = 1.0f - (float) (dist / SLAM_RADIUS) * 0.4f;
                     float finalDamage = damage * Math.max(0.6f, proximity);
 
-                    target.damage(sw, sw.getDamageSources().playerAttack(player), finalDamage);
+                    target.damage(sw.getDamageSources().playerAttack(player), finalDamage);
 
-                    Vec3d diff = target.getEntityPos().subtract(pos);
+                    Vec3d diff = target.getPos().subtract(pos);
                     Vec3d push = new Vec3d(diff.x, 0, diff.z).normalize().multiply(1.35);
                     target.takeKnockback(1.3, -push.x, -push.z);
                     target.addVelocity(0, 0.42, 0);
-                    target.velocityDirty = true;
+                    target.velocityModified = true;
                 }
             }
         }

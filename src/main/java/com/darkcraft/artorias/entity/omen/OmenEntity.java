@@ -1,10 +1,15 @@
 package com.darkcraft.artorias.entity.omen;
 
 import com.darkcraft.artorias.ArtoriasMod;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.*;
+import net.minecraft.entity.ai.goal.ActiveTargetGoal;
+import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.ai.goal.LookAroundGoal;
+import net.minecraft.entity.ai.goal.LookAtEntityGoal;
+import net.minecraft.entity.ai.goal.RevengeGoal;
+import net.minecraft.entity.ai.goal.SwimGoal;
+import net.minecraft.entity.ai.goal.WanderAroundFarGoal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
@@ -31,51 +36,50 @@ public class OmenEntity extends HostileEntity {
 
     public static final int STATE_IDLE = 0;
     public static final int STATE_OVERHEAD_SLAM = 1;
-    public static final int STATE_CLEAVER_SWEEP = 2;
-    public static final int STATE_CURSED_BREATH = 3;
-    public static final int STATE_KICK = 4;
-    public static final int STATE_STOMP = 5;
-    public static final int STATE_STAGGERED = 6;
+    public static final int STATE_KICK = 2;
+    public static final int STATE_STOMP = 3;
+    public static final int STATE_CURSED_BREATH = 4;
+    public static final int STATE_STAGGERED = 5;
+
+    public static final float MAX_POISE = 90.0f;
 
     private static final TrackedData<Integer> ATTACK_STATE = DataTracker.registerData(OmenEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> VARIANT = DataTracker.registerData(OmenEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Float> POISE = DataTracker.registerData(OmenEntity.class, TrackedDataHandlerRegistry.FLOAT);
 
-    public static final float MAX_POISE = 70.0f;
     private int attackTicks = 0;
-    private int specialCooldown = 80;
+    private int specialCooldown = 40;
 
     public OmenEntity(EntityType<? extends OmenEntity> entityType, World world) {
         super(entityType, world);
-        this.experiencePoints = 40;
+        this.experiencePoints = 35;
     }
 
     public OmenEntity(EntityType<? extends OmenEntity> entityType, World world, Variant variant) {
-        super(entityType, world);
-        this.setVariant(variant);
-        this.experiencePoints = 40;
+        this(entityType, world);
+        setVariant(variant);
     }
 
     public static DefaultAttributeContainer.Builder createCleaverAttributes() {
         return HostileEntity.createHostileAttributes()
-                .add(EntityAttributes.MAX_HEALTH, 140.0)
-                .add(EntityAttributes.MOVEMENT_SPEED, 0.28)
-                .add(EntityAttributes.ATTACK_DAMAGE, 11.0)
-                .add(EntityAttributes.ARMOR, 12.0)
-                .add(EntityAttributes.ARMOR_TOUGHNESS, 4.0)
-                .add(EntityAttributes.KNOCKBACK_RESISTANCE, 0.8)
-                .add(EntityAttributes.FOLLOW_RANGE, 32.0);
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 85.0)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.28)
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 11.0)
+                .add(EntityAttributes.GENERIC_ARMOR, 8.0)
+                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 4.0)
+                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.8)
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 32.0);
     }
 
     public static DefaultAttributeContainer.Builder createBrawlerAttributes() {
         return HostileEntity.createHostileAttributes()
-                .add(EntityAttributes.MAX_HEALTH, 120.0)
-                .add(EntityAttributes.MOVEMENT_SPEED, 0.31)
-                .add(EntityAttributes.ATTACK_DAMAGE, 9.0)
-                .add(EntityAttributes.ARMOR, 8.0)
-                .add(EntityAttributes.ARMOR_TOUGHNESS, 3.0)
-                .add(EntityAttributes.KNOCKBACK_RESISTANCE, 0.7)
-                .add(EntityAttributes.FOLLOW_RANGE, 32.0);
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 75.0)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.32)
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 8.0)
+                .add(EntityAttributes.GENERIC_ARMOR, 6.0)
+                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 2.0)
+                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.7)
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 32.0);
     }
 
     @Override
@@ -123,7 +127,7 @@ public class OmenEntity extends HostileEntity {
     }
 
     @Override
-    public boolean damage(ServerWorld world, DamageSource source, float amount) {
+    public boolean damage(DamageSource source, float amount) {
         // Poise damage calculation
         if (!isStaggered()) {
             float currentPoise = this.dataTracker.get(POISE);
@@ -136,15 +140,17 @@ public class OmenEntity extends HostileEntity {
                 this.attackTicks = 65; // ~3.25 seconds
                 this.dataTracker.set(POISE, MAX_POISE);
 
-                world.playSound(null, this.getX(), this.getY(), this.getZ(),
+                this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(),
                         SoundEvents.BLOCK_ANVIL_LAND, SoundCategory.HOSTILE, 1.8f, 0.6f);
-                world.spawnParticles(ParticleTypes.CRIT, this.getX(), this.getY() + 1.5, this.getZ(), 20, 0.5, 0.5, 0.5, 0.1);
+                if (this.getWorld() instanceof ServerWorld sw) {
+                    sw.spawnParticles(ParticleTypes.CRIT, this.getX(), this.getY() + 1.5, this.getZ(), 20, 0.5, 0.5, 0.5, 0.1);
+                }
             } else {
                 this.dataTracker.set(POISE, currentPoise);
             }
         }
 
-        return super.damage(world, source, amount);
+        return super.damage(source, amount);
     }
 
     @Override
@@ -157,22 +163,22 @@ public class OmenEntity extends HostileEntity {
             this.attackTicks--;
 
             // Ongoing effect handling for multi-tick attacks
-            if (this.getAttackState() == STATE_CURSED_BREATH && this.getEntityWorld() instanceof ServerWorld sw) {
+            if (this.getAttackState() == STATE_CURSED_BREATH && this.getWorld() instanceof ServerWorld sw) {
                 Vec3d look = this.getRotationVec(1.0f);
-                Vec3d mouth = this.getEntityPos().add(0, 2.0, 0).add(look.multiply(0.8));
+                Vec3d mouth = this.getPos().add(0, 2.0, 0).add(look.multiply(0.8));
                 sw.spawnParticles(ParticleTypes.SOUL_FIRE_FLAME, mouth.x, mouth.y, mouth.z, 6, 0.3, 0.3, 0.3, 0.08);
                 sw.spawnParticles(ParticleTypes.LARGE_SMOKE, mouth.x, mouth.y, mouth.z, 3, 0.2, 0.2, 0.2, 0.04);
 
                 Box cone = new Box(this.getBlockPos()).expand(4.0);
                 for (LivingEntity target : sw.getEntitiesByClass(LivingEntity.class, cone, e -> e != this && !(e instanceof OmenEntity))) {
                     if (this.canSee(target)) {
-                        target.damage(sw, sw.getDamageSources().mobAttack(this), 2.5f);
+                        target.damage(this.getWorld().getDamageSources().mobAttack(this), 2.5f);
                         target.setOnFireFor(3.0f);
                     }
                 }
             }
 
-            if (this.attackTicks == 0 && !this.getEntityWorld().isClient()) {
+            if (this.attackTicks == 0 && !this.getWorld().isClient()) {
                 setAttackState(STATE_IDLE);
             }
         }
@@ -183,20 +189,20 @@ public class OmenEntity extends HostileEntity {
         super.dropEquipment(world, source, causedByPlayer);
         int count = 2 + world.getRandom().nextInt(4); // 2 to 5 rations
         for (int i = 0; i < count; i++) {
-            this.dropItem(world, ArtoriasMod.SOUL_RATION);
+            this.dropItem(ArtoriasMod.SOUL_RATION);
         }
     }
 
     public void triggerOverheadSlam(LivingEntity target) {
-        if (!this.getEntityWorld().isClient()) {
+        if (!this.getWorld().isClient()) {
             this.setAttackState(STATE_OVERHEAD_SLAM);
             this.attackTicks = 26;
 
-            this.getEntityWorld().playSound(null, this.getX(), this.getY(), this.getZ(),
+            this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(),
                     SoundEvents.ENTITY_WARDEN_HEARTBEAT, SoundCategory.HOSTILE, 1.6f, 0.7f);
 
             // Trigger delayed impact damage at apex
-            if (this.getEntityWorld() instanceof ServerWorld sw) {
+            if (this.getWorld() instanceof ServerWorld sw) {
                 sw.getServer().execute(() -> {
                     new Thread(() -> {
                         try {
@@ -207,7 +213,7 @@ public class OmenEntity extends HostileEntity {
                             if (!this.isAlive() || this.isStaggered()) return;
 
                             Vec3d look = this.getRotationVec(1.0f);
-                            Vec3d impact = this.getEntityPos().add(look.multiply(2.2));
+                            Vec3d impact = this.getPos().add(look.multiply(2.2));
 
                             sw.playSound(null, impact.x, impact.y, impact.z,
                                     SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.HOSTILE, 1.4f, 0.8f);
@@ -219,7 +225,7 @@ public class OmenEntity extends HostileEntity {
 
                             Box aoe = new Box(impact.x - 2.5, impact.y - 1.0, impact.z - 2.5, impact.x + 2.5, impact.y + 2.5, impact.z + 2.5);
                             for (LivingEntity victim : sw.getEntitiesByClass(LivingEntity.class, aoe, e -> e != this && !(e instanceof OmenEntity))) {
-                                victim.damage(sw, sw.getDamageSources().mobAttack(this), 16.0f);
+                                victim.damage(this.getWorld().getDamageSources().mobAttack(this), 16.0f);
                                 victim.takeKnockback(1.2, this.getX() - victim.getX(), this.getZ() - victim.getZ());
                             }
                         });
@@ -230,32 +236,32 @@ public class OmenEntity extends HostileEntity {
     }
 
     public void triggerStomp() {
-        if (!this.getEntityWorld().isClient()) {
+        if (!this.getWorld().isClient()) {
             this.setAttackState(STATE_STOMP);
             this.attackTicks = 18;
 
-            if (this.getEntityWorld() instanceof ServerWorld sw) {
+            if (this.getWorld() instanceof ServerWorld sw) {
                 sw.playSound(null, this.getX(), this.getY(), this.getZ(),
                         SoundEvents.ENTITY_IRON_GOLEM_ATTACK, SoundCategory.HOSTILE, 1.5f, 0.6f);
                 sw.spawnParticles(ParticleTypes.EXPLOSION, this.getX(), this.getY(), this.getZ(), 1, 0.3, 0.1, 0.3, 0.02);
 
                 Box aoe = this.getBoundingBox().expand(3.0);
                 for (LivingEntity victim : sw.getEntitiesByClass(LivingEntity.class, aoe, e -> e != this && !(e instanceof OmenEntity))) {
-                    victim.damage(sw, sw.getDamageSources().mobAttack(this), 9.0f);
+                    victim.damage(this.getWorld().getDamageSources().mobAttack(this), 9.0f);
                     victim.setVelocity(victim.getVelocity().add(0, 0.5, 0));
-                    victim.velocityDirty = true;
+                    victim.velocityModified = true;
                 }
             }
         }
     }
 
     public void triggerKick(LivingEntity target) {
-        if (!this.getEntityWorld().isClient()) {
+        if (!this.getWorld().isClient()) {
             this.setAttackState(STATE_KICK);
             this.attackTicks = 16;
 
-            if (this.getEntityWorld() instanceof ServerWorld sw) {
-                this.tryAttack(sw, target);
+            if (this.getWorld() instanceof ServerWorld sw) {
+                this.tryAttack(target);
                 target.takeKnockback(1.8, this.getX() - target.getX(), this.getZ() - target.getZ());
                 sw.playSound(null, this.getX(), this.getY(), this.getZ(),
                         SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK, SoundCategory.HOSTILE, 1.4f, 0.7f);
@@ -264,11 +270,11 @@ public class OmenEntity extends HostileEntity {
     }
 
     public void triggerCursedBreath() {
-        if (!this.getEntityWorld().isClient()) {
+        if (!this.getWorld().isClient()) {
             this.setAttackState(STATE_CURSED_BREATH);
             this.attackTicks = 30;
 
-            this.getEntityWorld().playSound(null, this.getX(), this.getY(), this.getZ(),
+            this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(),
                     SoundEvents.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.HOSTILE, 1.4f, 0.6f);
         }
     }
@@ -289,9 +295,15 @@ public class OmenEntity extends HostileEntity {
         }
 
         @Override
+        public boolean shouldContinue() {
+            LivingEntity target = omen.getTarget();
+            return target != null && target.isAlive() && !omen.isStaggered();
+        }
+
+        @Override
         public void tick() {
             LivingEntity target = omen.getTarget();
-            if (target == null || omen.isStaggered()) return;
+            if (target == null) return;
 
             omen.getLookControl().lookAt(target, 30.0f, 30.0f);
             double distSq = omen.squaredDistanceTo(target);
@@ -329,9 +341,7 @@ public class OmenEntity extends HostileEntity {
 
             // Normal approach and melee
             if (distSq <= 6.0) {
-                if (omen.getEntityWorld() instanceof ServerWorld sw) {
-                    omen.tryAttack(sw, target);
-                }
+                omen.tryAttack(target);
             } else {
                 omen.getNavigation().startMovingTo(target, 1.15);
             }

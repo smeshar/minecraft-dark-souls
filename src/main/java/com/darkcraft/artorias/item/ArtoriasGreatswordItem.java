@@ -4,37 +4,37 @@ import com.darkcraft.artorias.entity.artorias.ArtoriasEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ToolMaterial;
+import net.minecraft.item.SwordItem;
+import net.minecraft.item.ToolMaterials;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-public class ArtoriasGreatswordItem extends Item {
+public class ArtoriasGreatswordItem extends SwordItem {
     public ArtoriasGreatswordItem(Settings settings) {
-        super(ToolMaterial.NETHERITE.applySwordSettings(settings, 12.0f, -2.4f));
+        super(ToolMaterials.NETHERITE, settings.attributeModifiers(SwordItem.createAttributeModifiers(ToolMaterials.NETHERITE, 12, -2.4f)));
     }
 
     @Override
-    public ActionResult use(World world, PlayerEntity player, Hand hand) {
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack stack = player.getStackInHand(hand);
 
-        if (!player.getItemCooldownManager().isCoolingDown(stack)) {
-            player.getItemCooldownManager().set(stack, 80); // 4 seconds cooldown
+        if (!player.getItemCooldownManager().isCoolingDown(this)) {
+            player.getItemCooldownManager().set(this, 80); // 4 seconds cooldown
 
             // Artorias Leaping Somersault Flip Slam
             Vec3d look = player.getRotationVec(1.0f);
             Vec3d leap = new Vec3d(look.x, 0, look.z).normalize().multiply(1.25).add(0, 0.72, 0);
 
             player.setVelocity(leap);
-            player.velocityDirty = true;
+            player.velocityModified = true;
 
             world.playSound(null, player.getX(), player.getY(), player.getZ(),
                     SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 1.2f, 0.7f);
@@ -45,10 +45,10 @@ public class ArtoriasGreatswordItem extends Item {
                 });
             }
 
-            return ActionResult.SUCCESS;
+            return TypedActionResult.success(stack, world.isClient());
         }
 
-        return ActionResult.PASS;
+        return TypedActionResult.pass(stack);
     }
 
     private void triggerSlamDelayed(ServerWorld world, PlayerEntity player) {
@@ -76,7 +76,7 @@ public class ArtoriasGreatswordItem extends Item {
                 Box damageBox = new Box(px - 4.5, py - 2.0, pz - 4.5, px + 4.5, py + 3.0, pz + 4.5);
                 for (Entity entity : world.getOtherEntities(player, damageBox)) {
                     if (entity instanceof LivingEntity target && !(entity instanceof PlayerEntity)) {
-                        target.damage(world, world.getDamageSources().playerAttack(player), 24.0f);
+                        target.damage(world.getDamageSources().playerAttack(player), 24.0f);
                         target.takeKnockback(0.9, px - target.getX(), pz - target.getZ());
 
                         // Heavy poise damage if target is Artorias

@@ -8,19 +8,19 @@ public enum MargitAttackState {
     IDLE(0, 0, 0, 0, 0, 0, "animation.margit.idle"),
 
     // Fast horizontal sweeps with deliberate wind-up delay (distance < 4 blocks)
-    STAFF_SWING_COMBO(1, 45, 18, 19, 26, 19, "animation.margit.staff_swing_combo"),
+    STAFF_SWING_COMBO(1, 22, 7, 8, 11, 11, "animation.margit.staff_swing_combo"),
 
     // High jumping forward staff leap slam (distance > 12 blocks)
-    STAFF_LEAP(2, 60, 28, 29, 36, 24, "animation.margit.staff_leap"),
+    STAFF_LEAP(2, 36, 18, 19, 22, 14, "animation.margit.staff_leap"),
 
     // Double spectral golden dagger toss (distance > 12 blocks)
-    DAGGER_TOSS(3, 40, 12, 13, 26, 14, "animation.margit.dagger_toss"),
+    DAGGER_TOSS(3, 20, 5, 6, 12, 8, "animation.margit.dagger_toss"),
 
     // Rapid 360-degree tail swipe when player gets behind boss
-    TAIL_SWIPE(4, 30, 8, 9, 16, 14, "animation.margit.tail_swipe"),
+    TAIL_SWIPE(4, 16, 3, 4, 7, 9, "animation.margit.tail_swipe"),
 
     // Phase 2 massive jumping golden hammer overhead slam with ground shockwave
-    HAMMER_SLAM(5, 70, 35, 36, 44, 26, "animation.margit.hammer_slam"),
+    HAMMER_SLAM(5, 42, 22, 23, 26, 16, "animation.margit.hammer_slam"),
 
     // Phase 2 transition roar with golden aura and invulnerability (HP < 60%)
     PHASE_TRANSITION(6, 80, 0, 0, 0, 80, "animation.margit.phase2_roar"),

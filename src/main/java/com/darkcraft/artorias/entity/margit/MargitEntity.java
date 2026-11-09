@@ -1,6 +1,5 @@
 package com.darkcraft.artorias.entity.margit;
 
-import com.darkcraft.artorias.ArtoriasMod;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -33,22 +32,31 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.AnimationState;
+import software.bernie.geckolib.animation.PlayState;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.List;
 
 /**
- * Margit, the Fell Omen - Epic Elden Ring Boss for Fabric 1.21.1.
+ * Margit, the Fell Omen - Epic Elden Ring Boss for Fabric 1.21.1 with GeckoLib.
  * Features frame-accurate delayed attacks, stance/poise break & riposte,
  * dynamic phase 2 transition with spectral golden hammer & sword,
  * and adaptive AI response to player positioning (tail swipe on behind-rolls).
  */
-public class MargitEntity extends HostileEntity {
+public class MargitEntity extends HostileEntity implements GeoEntity {
 
     public static final float MAX_POISE = 120.0f;
     private static final int POISE_RECOVERY_DELAY = 100; // 5 seconds (100 ticks)
 
     private static final TrackedData<Integer> ATTACK_STATE = DataTracker.registerData(MargitEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> ATTACK_TICKS = DataTracker.registerData(MargitEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Integer> ATTACK_COUNTER = DataTracker.registerData(MargitEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Boolean> PHASE_TWO = DataTracker.registerData(MargitEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Float> POISE = DataTracker.registerData(MargitEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static final TrackedData<Integer> SHACKLE_USES = DataTracker.registerData(MargitEntity.class, TrackedDataHandlerRegistry.INTEGER);
@@ -58,6 +66,8 @@ public class MargitEntity extends HostileEntity {
             BossBar.Color.YELLOW,
             BossBar.Style.NOTCHED_10
     );
+
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     private int timeSinceLastHit = 0;
     private int stunTicks = 0;
@@ -71,13 +81,13 @@ public class MargitEntity extends HostileEntity {
 
     public static DefaultAttributeContainer.Builder createAttributes() {
         return HostileEntity.createHostileAttributes()
-                .add(EntityAttributes.MAX_HEALTH, 850.0) // Boss HP bar
-                .add(EntityAttributes.MOVEMENT_SPEED, 0.32)
-                .add(EntityAttributes.ATTACK_DAMAGE, 12.0)
-                .add(EntityAttributes.ARMOR, 14.0)
-                .add(EntityAttributes.ARMOR_TOUGHNESS, 6.0)
-                .add(EntityAttributes.KNOCKBACK_RESISTANCE, 1.0)
-                .add(EntityAttributes.FOLLOW_RANGE, 64.0);
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 850.0) // Boss HP bar
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.32)
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 12.0)
+                .add(EntityAttributes.GENERIC_ARMOR, 14.0)
+                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 6.0)
+                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 1.0)
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 64.0);
     }
 
     @Override
@@ -85,6 +95,7 @@ public class MargitEntity extends HostileEntity {
         super.initDataTracker(builder);
         builder.add(ATTACK_STATE, MargitAttackState.IDLE.getId());
         builder.add(ATTACK_TICKS, 0);
+        builder.add(ATTACK_COUNTER, 0);
         builder.add(PHASE_TWO, false);
         builder.add(POISE, MAX_POISE);
         builder.add(SHACKLE_USES, 0);
@@ -103,6 +114,84 @@ public class MargitEntity extends HostileEntity {
     }
 
     // ==========================================
+    // GeckoLib Animation Controllers
+    // ==========================================
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>(this, "movement", 3, this::movementPredicate));
+        controllers.add(new AnimationController<>(this, "attack", 1, this::attackPredicate));
+    }
+
+    private PlayState movementPredicate(AnimationState<MargitEntity> state) {
+        // Prevent movement controller from overriding or blending over active attack animations
+        if (getAttackState() != MargitAttackState.IDLE) {
+            return PlayState.STOP;
+        }
+        if (state.isMoving()) {
+            return state.setAndContinue(RawAnimation.begin().thenLoop("animation.margit.walk"));
+        }
+        return state.setAndContinue(RawAnimation.begin().thenLoop("animation.margit.idle"));
+    }
+
+    private int clientLastAttackCounter = -1;
+    private MargitAttackState clientLastAttack = MargitAttackState.IDLE;
+
+    private PlayState attackPredicate(AnimationState<MargitEntity> state) {
+        MargitAttackState attack = getAttackState();
+        int counter = getAttackCounter();
+
+        if (attack != MargitAttackState.IDLE) {
+            // New attack started: reset controller so GeckoLib never skips repeated animations
+            if (counter != this.clientLastAttackCounter || attack != this.clientLastAttack) {
+                this.clientLastAttackCounter = counter;
+                this.clientLastAttack = attack;
+                state.resetCurrentAnimation();
+            }
+            return state.setAndContinue(RawAnimation.begin().thenPlay(attack.getAnimationName()));
+        }
+
+        // Clean controller reset when returning to idle
+        if (this.clientLastAttack != MargitAttackState.IDLE) {
+            this.clientLastAttack = MargitAttackState.IDLE;
+            state.resetCurrentAnimation();
+        }
+        return PlayState.STOP;
+    }
+
+    @Override
+    public void onTrackedDataSet(TrackedData<?> data) {
+        super.onTrackedDataSet(data);
+        if (this.getWorld().isClient() && (ATTACK_COUNTER.equals(data) || ATTACK_STATE.equals(data))) {
+            MargitAttackState state = getAttackState();
+            if (state != MargitAttackState.IDLE) {
+                this.clientLastAttackCounter = getAttackCounter();
+                this.clientLastAttack = state;
+                AnimatableManager<MargitEntity> manager = getAnimatableInstanceCache().getManagerForId(this.getId());
+                if (manager != null) {
+                    AnimationController<MargitEntity> controller = manager.getAnimationControllers().get("attack");
+                    if (controller != null) {
+                        controller.forceAnimationReset();
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void takeKnockback(double strength, double x, double z) {
+        // Boss Hyperarmor: Margit resists all standard attack knockback, only knocked back when poise is broken
+        if (isStunned()) {
+            super.takeKnockback(strength, x, z);
+        }
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return this.cache;
+    }
+
+    // ==========================================
     // State Machine & Timings
     // ==========================================
 
@@ -110,9 +199,16 @@ public class MargitEntity extends HostileEntity {
         return MargitAttackState.fromId(this.dataTracker.get(ATTACK_STATE));
     }
 
+    public int getAttackCounter() {
+        return this.dataTracker.get(ATTACK_COUNTER);
+    }
+
     public void setAttackState(MargitAttackState state) {
         this.dataTracker.set(ATTACK_STATE, state.getId());
         this.setAttackTicks(0);
+        if (state != MargitAttackState.IDLE) {
+            this.dataTracker.set(ATTACK_COUNTER, getAttackCounter() + 1);
+        }
     }
 
     public int getAttackTicks() {
@@ -179,7 +275,7 @@ public class MargitEntity extends HostileEntity {
     public void tick() {
         super.tick();
 
-        World world = this.getEntityWorld();
+        World world = this.getWorld();
         if (!world.isClient()) {
             this.bossBar.setPercent(this.getHealth() / this.getMaxHealth());
 
@@ -223,7 +319,7 @@ public class MargitEntity extends HostileEntity {
         setAttackState(MargitAttackState.PHASE_TRANSITION);
         this.getNavigation().stop();
 
-        World world = this.getEntityWorld();
+        World world = this.getWorld();
         if (world instanceof ServerWorld serverWorld) {
             serverWorld.playSound(null, this.getX(), this.getY(), this.getZ(),
                     SoundEvents.ENTITY_WARDEN_ROAR, SoundCategory.HOSTILE, 1.8f, 0.85f);
@@ -236,7 +332,7 @@ public class MargitEntity extends HostileEntity {
         incrementAttackTicks();
 
         // Spawn brilliant golden aura particles swirling around Margit
-        World world = this.getEntityWorld();
+        World world = this.getWorld();
         if (world instanceof ServerWorld serverWorld) {
             double angle = (ticks * 18.0) * Math.PI / 180.0;
             double radius = 1.6;
@@ -260,7 +356,7 @@ public class MargitEntity extends HostileEntity {
         this.getNavigation().stop();
         stunTicks++;
 
-        World world = this.getEntityWorld();
+        World world = this.getWorld();
         if (world instanceof ServerWorld serverWorld && stunTicks % 5 == 0) {
             // Critical posture break indicator sparks above head
             serverWorld.spawnParticles(ParticleTypes.CRIT, this.getX(), this.getY() + 2.6, this.getZ(), 6, 0.3, 0.3, 0.3, 0.1);
@@ -277,7 +373,7 @@ public class MargitEntity extends HostileEntity {
         this.getNavigation().stop();
         pinnedTicks++;
 
-        World world = this.getEntityWorld();
+        World world = this.getWorld();
         if (world instanceof ServerWorld serverWorld && pinnedTicks % 4 == 0) {
             // Golden shackle chains holding boss to the ground
             for (int i = 0; i < 4; i++) {
@@ -299,15 +395,25 @@ public class MargitEntity extends HostileEntity {
     // ==========================================
 
     @Override
-    public boolean damage(ServerWorld world, DamageSource source, float amount) {
+    public boolean damage(DamageSource source, float amount) {
         // Complete invulnerability during the Phase 2 transition scream
         if (isInPhaseTransition()) {
             return false;
         }
 
-        boolean damaged = super.damage(world, source, amount);
+        // Preserve velocity across damage events to guarantee hyperarmor on active attacks
+        Vec3d prevVelocity = this.getVelocity();
+        MargitAttackState prevAttack = getAttackState();
+
+        boolean damaged = super.damage(source, amount);
         if (damaged) {
             timeSinceLastHit = 0;
+
+            // Hyperarmor: retain attack leap/slam momentum against player knockback attacks
+            if (prevAttack != MargitAttackState.IDLE && !isStunned() && !isPinned()) {
+                this.setVelocity(prevVelocity);
+                this.velocityModified = true;
+            }
 
             // Calculate poise damage based on weapon type
             float poiseDamage = 12.0f;
@@ -343,7 +449,7 @@ public class MargitEntity extends HostileEntity {
         stunTicks = 0;
         this.getNavigation().stop();
 
-        World world = this.getEntityWorld();
+        World world = this.getWorld();
         if (world instanceof ServerWorld serverWorld) {
             serverWorld.playSound(null, this.getX(), this.getY(), this.getZ(),
                     SoundEvents.ITEM_SHIELD_BREAK, SoundCategory.HOSTILE, 1.8f, 0.6f);
@@ -362,15 +468,15 @@ public class MargitEntity extends HostileEntity {
         if (isStunned() && hand == Hand.MAIN_HAND) {
             // Check if player is facing and standing in front of Margit
             Vec3d bossFacing = this.getRotationVec(1.0f);
-            Vec3d bossToPlayer = player.getEntityPos().subtract(this.getEntityPos()).normalize();
+            Vec3d bossToPlayer = player.getPos().subtract(this.getPos()).normalize();
             double dot = bossFacing.x * bossToPlayer.x + bossFacing.z * bossToPlayer.z;
 
             // dot > 0.4 means player is within the frontal 120-degree cone
             if (dot > 0.4) {
-                World world = this.getEntityWorld();
+                World world = this.getWorld();
                 if (world instanceof ServerWorld serverWorld) {
                     float critDamage = (float) (this.getMaxHealth() * 0.18); // 18% max health critical strike
-                    this.damage(serverWorld, world.getDamageSources().playerAttack(player), critDamage);
+                    this.damage(world.getDamageSources().playerAttack(player), critDamage);
 
                     serverWorld.playSound(null, this.getX(), this.getY(), this.getZ(),
                             SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, SoundCategory.PLAYERS, 2.0f, 0.7f);
@@ -407,7 +513,7 @@ public class MargitEntity extends HostileEntity {
         pinnedTicks = 0;
         this.getNavigation().stop();
 
-        World world = this.getEntityWorld();
+        World world = this.getWorld();
         if (world instanceof ServerWorld serverWorld) {
             serverWorld.playSound(null, this.getX(), this.getY(), this.getZ(),
                     SoundEvents.BLOCK_CHAIN_PLACE, SoundCategory.HOSTILE, 2.0f, 0.6f);
@@ -427,7 +533,7 @@ public class MargitEntity extends HostileEntity {
      * Iterates outwards in concentric rings, deals damage, and knocks players upwards.
      */
     public void performRadialShockwave(double maxRadius, float damage) {
-        World world = this.getEntityWorld();
+        World world = this.getWorld();
         if (!(world instanceof ServerWorld serverWorld)) return;
 
         serverWorld.playSound(null, this.getX(), this.getY(), this.getZ(),
@@ -446,7 +552,7 @@ public class MargitEntity extends HostileEntity {
         }
 
         // Damage & knockup all living entities within radial distance
-        Box shockwaveBox = Box.of(this.getEntityPos(), maxRadius * 2, 4.0, maxRadius * 2);
+        Box shockwaveBox = Box.of(this.getPos(), maxRadius * 2, 4.0, maxRadius * 2);
         List<LivingEntity> targets = serverWorld.getEntitiesByClass(LivingEntity.class, shockwaveBox, e -> e != this && e.isAlive());
 
         for (LivingEntity target : targets) {
@@ -455,12 +561,12 @@ public class MargitEntity extends HostileEntity {
                 DamageSource damageSource = world.getDamageSources().mobAttack(this);
                 // Damage falls off slightly at edge of shockwave
                 float effectiveDamage = (float) (damage * (1.0 - (dist / (maxRadius * 2.0))));
-                target.damage(serverWorld, damageSource, effectiveDamage);
+                target.damage(damageSource, effectiveDamage);
 
                 // Vertical launch + horizontal outward blast
-                Vec3d outward = target.getEntityPos().subtract(this.getEntityPos()).normalize().multiply(0.65);
+                Vec3d outward = target.getPos().subtract(this.getPos()).normalize().multiply(0.65);
                 target.setVelocity(outward.x, 0.52, outward.z);
-                target.velocityDirty = true;
+                target.velocityModified = true;
             }
         }
     }

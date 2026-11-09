@@ -90,11 +90,11 @@ public class DodgeRollManager {
                 ROLL_VERTICAL_HOP,
                 rollDirection.z * ROLL_HORIZONTAL_POWER
         );
-        player.velocityDirty = true;
+        player.velocityModified = true;
         player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(player));
 
-        if (player.getEntityWorld() instanceof ServerWorld serverWorld) {
-            Vec3d pos = player.getEntityPos();
+        if (player.getWorld() instanceof ServerWorld serverWorld) {
+            Vec3d pos = player.getPos();
             // Sharp sweep slash & abyssal soul trail
             serverWorld.spawnParticles(ParticleTypes.SWEEP_ATTACK, pos.x + rollDirection.x * 0.6, pos.y + 0.3, pos.z + rollDirection.z * 0.6, 1, 0, 0, 0, 0.0);
             serverWorld.spawnParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.x, pos.y + 0.1, pos.z, 10, 0.25, 0.08, 0.25, 0.02);
