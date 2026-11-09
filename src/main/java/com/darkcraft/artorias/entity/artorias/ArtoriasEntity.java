@@ -32,10 +32,18 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.AnimationState;
+import software.bernie.geckolib.animation.PlayState;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.EnumSet;
 
-public class ArtoriasEntity extends HostileEntity {
+public class ArtoriasEntity extends HostileEntity implements GeoEntity {
     public static final int STATE_IDLE = 0;
     public static final int STATE_SOMERSAULT_FLIP = 1;
     public static final int STATE_GLIDE_LUNGE = 2;
@@ -45,10 +53,12 @@ public class ArtoriasEntity extends HostileEntity {
     public static final int STATE_PHASE_TWO_ROAR = 6;
 
     private static final TrackedData<Integer> ATTACK_STATE = DataTracker.registerData(ArtoriasEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Integer> ATTACK_COUNTER = DataTracker.registerData(ArtoriasEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Float> POISE = DataTracker.registerData(ArtoriasEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static final TrackedData<Boolean> PHASE_TWO = DataTracker.registerData(ArtoriasEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 
     public static final float MAX_POISE = 150.0f;
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private int attackTicks = 0;
     private int staggerTicks = 0;
     private int consecutiveFlips = 0;
@@ -81,6 +91,7 @@ public class ArtoriasEntity extends HostileEntity {
     protected void initDataTracker(DataTracker.Builder builder) {
         super.initDataTracker(builder);
         builder.add(ATTACK_STATE, STATE_IDLE);
+        builder.add(ATTACK_COUNTER, 0);
         builder.add(POISE, MAX_POISE);
         builder.add(PHASE_TWO, false);
     }
@@ -101,12 +112,113 @@ public class ArtoriasEntity extends HostileEntity {
         return this.dataTracker.get(ATTACK_STATE);
     }
 
+    public int getAttackCounter() {
+        return this.dataTracker.get(ATTACK_COUNTER);
+    }
+
     public void setAttackState(int state) {
         this.dataTracker.set(ATTACK_STATE, state);
+        this.dataTracker.set(ATTACK_COUNTER, this.dataTracker.get(ATTACK_COUNTER) + 1);
         this.attackTicks = 0;
         if (state == STATE_STAGGERED) {
             this.staggerTicks = 120;
         }
+    }
+
+    // ==========================================
+    // GeckoLib Animation Controllers
+    // ==========================================
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>(this, "movement", 3, this::movementPredicate));
+        controllers.add(new AnimationController<>(this, "attack", 1, this::attackPredicate));
+    }
+
+    private PlayState movementPredicate(AnimationState<ArtoriasEntity> state) {
+        if (isDead()) {
+            return PlayState.STOP;
+        }
+        if (getAttackState() != STATE_IDLE) {
+            return PlayState.STOP;
+        }
+        if (state.isMoving()) {
+            return state.setAndContinue(RawAnimation.begin().thenLoop("animation.artorias.walk"));
+        }
+        return state.setAndContinue(RawAnimation.begin().thenLoop("animation.artorias.idle"));
+    }
+
+    private int clientLastAttackCounter = -1;
+    private int clientLastAttack = STATE_IDLE;
+
+    private PlayState attackPredicate(AnimationState<ArtoriasEntity> state) {
+        if (isDead()) {
+            return state.setAndContinue(RawAnimation.begin().thenPlay("animation.artorias.death"));
+        }
+
+        int attack = getAttackState();
+        int counter = getAttackCounter();
+
+        if (attack != STATE_IDLE) {
+            if (counter != this.clientLastAttackCounter || attack != this.clientLastAttack) {
+                this.clientLastAttackCounter = counter;
+                this.clientLastAttack = attack;
+                state.resetCurrentAnimation();
+            }
+            String animName = getAnimationForState(attack);
+            if (animName != null) {
+                return state.setAndContinue(RawAnimation.begin().thenPlay(animName));
+            }
+        }
+
+        if (this.clientLastAttack != STATE_IDLE) {
+            this.clientLastAttack = STATE_IDLE;
+            state.resetCurrentAnimation();
+        }
+        return PlayState.STOP;
+    }
+
+    public String getAnimationForState(int state) {
+        return switch (state) {
+            case STATE_SOMERSAULT_FLIP -> "animation.artorias.somersault_flip";
+            case STATE_GLIDE_LUNGE -> "animation.artorias.glide_lunge";
+            case STATE_SPIN_SLASH -> "animation.artorias.spin_slash";
+            case STATE_ABYSS_SLUDGE -> "animation.artorias.abyss_sludge";
+            case STATE_PHASE_TWO_ROAR -> "animation.artorias.phase2_roar";
+            case STATE_STAGGERED -> "animation.artorias.staggered";
+            default -> null;
+        };
+    }
+
+    @Override
+    public void onTrackedDataSet(TrackedData<?> data) {
+        super.onTrackedDataSet(data);
+        if (this.getWorld().isClient() && (ATTACK_COUNTER.equals(data) || ATTACK_STATE.equals(data))) {
+            int state = getAttackState();
+            if (state != STATE_IDLE) {
+                this.clientLastAttackCounter = getAttackCounter();
+                this.clientLastAttack = state;
+                AnimatableManager<ArtoriasEntity> manager = getAnimatableInstanceCache().getManagerForId(this.getId());
+                if (manager != null) {
+                    AnimationController<ArtoriasEntity> controller = manager.getAnimationControllers().get("attack");
+                    if (controller != null) {
+                        controller.forceAnimationReset();
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void takeKnockback(double strength, double x, double z) {
+        if (isStaggered()) {
+            super.takeKnockback(strength, x, z);
+        }
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return this.cache;
     }
 
     public int getAttackTicks() {
