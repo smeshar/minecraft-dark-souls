@@ -1,0 +1,962 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.artorias",
+        "texture_width": 128,
+        "texture_height": 128,
+        "visible_bounds_width": 4.0,
+        "visible_bounds_height": 4.5,
+        "visible_bounds_offset": [
+          0,
+          1.75,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "body",
+          "pivot": [
+            0,
+            15,
+            0
+          ],
+          "parent": "root",
+          "cubes": [
+            {
+              "origin": [
+                -4.0,
+                21.0,
+                -2.0
+              ],
+              "size": [
+                8,
+                8,
+                5
+              ],
+              "uv": [
+                26,
+                12
+              ],
+              "name": "chestplate"
+            },
+            {
+              "origin": [
+                -3.0,
+                18.0,
+                -2.0
+              ],
+              "size": [
+                6,
+                3,
+                4
+              ],
+              "uv": [
+                52,
+                12
+              ],
+              "name": "abdomen"
+            },
+            {
+              "origin": [
+                -3.0,
+                13.0,
+                -2.0
+              ],
+              "size": [
+                6,
+                5,
+                4
+              ],
+              "uv": [
+                72,
+                12
+              ],
+              "name": "pelvis"
+            },
+            {
+              "origin": [
+                -4.05,
+                25.0,
+                -2.8
+              ],
+              "size": [
+                8,
+                4,
+                1
+              ],
+              "uv": [
+                92,
+                12
+              ],
+              "name": "cowl_chest_drape"
+            },
+            {
+              "origin": [
+                -4.5,
+                20.0,
+                3.05
+              ],
+              "size": [
+                9,
+                9,
+                1
+              ],
+              "uv": [
+                0,
+                25
+              ],
+              "name": "cape_upper"
+            },
+            {
+              "origin": [
+                -5.0,
+                10.0,
+                3.1
+              ],
+              "size": [
+                10,
+                10,
+                1
+              ],
+              "uv": [
+                20,
+                25
+              ],
+              "name": "cape_mid"
+            },
+            {
+              "origin": [
+                2.0,
+                1.0,
+                3.15
+              ],
+              "size": [
+                3,
+                9,
+                1
+              ],
+              "uv": [
+                42,
+                25
+              ],
+              "name": "cape_tatter_r"
+            },
+            {
+              "origin": [
+                -2.0,
+                3.0,
+                3.15
+              ],
+              "size": [
+                4,
+                7,
+                1
+              ],
+              "uv": [
+                50,
+                25
+              ],
+              "name": "cape_tatter_c"
+            },
+            {
+              "origin": [
+                -5.0,
+                0.0,
+                3.15
+              ],
+              "size": [
+                3,
+                10,
+                1
+              ],
+              "uv": [
+                60,
+                25
+              ],
+              "name": "cape_tatter_l"
+            },
+            {
+              "origin": [
+                -3.55,
+                16.5,
+                -2.55
+              ],
+              "size": [
+                7,
+                2,
+                5
+              ],
+              "uv": [
+                68,
+                25
+              ],
+              "name": "belt"
+            },
+            {
+              "origin": [
+                -0.8,
+                8.0,
+                -2.7
+              ],
+              "size": [
+                2,
+                9,
+                1
+              ],
+              "uv": [
+                92,
+                25
+              ],
+              "name": "belt_strap"
+            },
+            {
+              "origin": [
+                -2.5,
+                10.0,
+                -2.3
+              ],
+              "size": [
+                5,
+                4,
+                1
+              ],
+              "uv": [
+                98,
+                25
+              ],
+              "name": "mail_skirt_front"
+            },
+            {
+              "origin": [
+                -2.5,
+                10.0,
+                1.8
+              ],
+              "size": [
+                5,
+                4,
+                1
+              ],
+              "uv": [
+                110,
+                25
+              ],
+              "name": "mail_skirt_back"
+            }
+          ]
+        },
+        {
+          "name": "head",
+          "pivot": [
+            0,
+            30,
+            0
+          ],
+          "parent": "body",
+          "cubes": [
+            {
+              "origin": [
+                -3.0,
+                31.0,
+                -3.0
+              ],
+              "size": [
+                6,
+                6,
+                6
+              ],
+              "uv": [
+                0,
+                0
+              ],
+              "name": "hood_base"
+            },
+            {
+              "origin": [
+                -3.5,
+                29.0,
+                -3.5
+              ],
+              "size": [
+                7,
+                2,
+                7
+              ],
+              "uv": [
+                24,
+                0
+              ],
+              "name": "hood_collar"
+            },
+            {
+              "origin": [
+                -3.05,
+                35.0,
+                -3.05
+              ],
+              "size": [
+                6,
+                2,
+                6
+              ],
+              "uv": [
+                52,
+                0
+              ],
+              "name": "helm_crown"
+            },
+            {
+              "origin": [
+                -0.5,
+                37.05,
+                -2.0
+              ],
+              "size": [
+                1,
+                3,
+                4
+              ],
+              "uv": [
+                76,
+                0
+              ],
+              "name": "helm_crest_fin"
+            },
+            {
+              "origin": [
+                -2.0,
+                34.0,
+                -4.5
+              ],
+              "size": [
+                4,
+                2,
+                2
+              ],
+              "uv": [
+                86,
+                0
+              ],
+              "name": "helm_visor_beak"
+            },
+            {
+              "origin": [
+                3.05,
+                34.0,
+                -2.0
+              ],
+              "size": [
+                1,
+                4,
+                3
+              ],
+              "uv": [
+                98,
+                0
+              ],
+              "name": "helm_wing_r"
+            },
+            {
+              "origin": [
+                -4.05,
+                34.0,
+                -2.0
+              ],
+              "size": [
+                1,
+                4,
+                3
+              ],
+              "uv": [
+                106,
+                0
+              ],
+              "name": "helm_wing_l"
+            },
+            {
+              "origin": [
+                -1.0,
+                37.0,
+                -1.0
+              ],
+              "size": [
+                2,
+                4,
+                3
+              ],
+              "uv": [
+                114,
+                0
+              ],
+              "name": "plume_crest"
+            },
+            {
+              "origin": [
+                -1.0,
+                36.0,
+                2.0
+              ],
+              "size": [
+                2,
+                3,
+                3
+              ],
+              "uv": [
+                0,
+                12
+              ],
+              "name": "plume_arch"
+            },
+            {
+              "origin": [
+                -1.0,
+                28.0,
+                3.0
+              ],
+              "size": [
+                2,
+                8,
+                2
+              ],
+              "uv": [
+                10,
+                12
+              ],
+              "name": "plume_mid"
+            },
+            {
+              "origin": [
+                -1.0,
+                18.0,
+                4.0
+              ],
+              "size": [
+                2,
+                10,
+                2
+              ],
+              "uv": [
+                18,
+                12
+              ],
+              "name": "plume_tail"
+            }
+          ]
+        },
+        {
+          "name": "right_arm",
+          "pivot": [
+            5.5,
+            28,
+            0
+          ],
+          "parent": "body",
+          "cubes": [
+            {
+              "origin": [
+                3.5,
+                25.9,
+                -2.0
+              ],
+              "size": [
+                4,
+                3,
+                4
+              ],
+              "uv": [
+                0,
+                36
+              ],
+              "name": "right_shoulder"
+            },
+            {
+              "origin": [
+                5.0,
+                28.0,
+                -2.05
+              ],
+              "size": [
+                1,
+                4,
+                4
+              ],
+              "uv": [
+                16,
+                36
+              ],
+              "name": "right_haute_piece"
+            },
+            {
+              "origin": [
+                4.0,
+                20.0,
+                -2.0
+              ],
+              "size": [
+                3,
+                6,
+                4
+              ],
+              "uv": [
+                26,
+                36
+              ],
+              "name": "right_bicep"
+            },
+            {
+              "origin": [
+                4.0,
+                14.0,
+                -1.8
+              ],
+              "size": [
+                3,
+                6,
+                4
+              ],
+              "uv": [
+                40,
+                36
+              ],
+              "name": "right_vambrace"
+            },
+            {
+              "origin": [
+                4.0,
+                12.0,
+                -1.8
+              ],
+              "size": [
+                3,
+                2,
+                4
+              ],
+              "uv": [
+                54,
+                36
+              ],
+              "name": "right_gauntlet"
+            },
+            {
+              "origin": [
+                4.5,
+                17.5,
+                -0.8
+              ],
+              "size": [
+                2,
+                2,
+                2
+              ],
+              "uv": [
+                68,
+                36
+              ],
+              "name": "sword_pommel"
+            },
+            {
+              "origin": [
+                5.0,
+                13.0,
+                -0.5
+              ],
+              "size": [
+                1,
+                5,
+                1
+              ],
+              "uv": [
+                76,
+                36
+              ],
+              "name": "sword_grip"
+            },
+            {
+              "origin": [
+                1.0,
+                11.5,
+                -1.5
+              ],
+              "size": [
+                9,
+                2,
+                3
+              ],
+              "uv": [
+                80,
+                36
+              ],
+              "name": "sword_guard"
+            },
+            {
+              "origin": [
+                3.5,
+                6.0,
+                -0.5
+              ],
+              "size": [
+                4,
+                6,
+                1
+              ],
+              "uv": [
+                104,
+                36
+              ],
+              "name": "sword_ricasso"
+            },
+            {
+              "origin": [
+                3.5,
+                -4.0,
+                -0.5
+              ],
+              "size": [
+                4,
+                10,
+                1
+              ],
+              "uv": [
+                114,
+                36
+              ],
+              "name": "sword_blade_main"
+            },
+            {
+              "origin": [
+                4.0,
+                -9.0,
+                -0.5
+              ],
+              "size": [
+                3,
+                5,
+                1
+              ],
+              "uv": [
+                0,
+                47
+              ],
+              "name": "sword_blade_tip"
+            }
+          ]
+        },
+        {
+          "name": "left_arm",
+          "pivot": [
+            -5.5,
+            28,
+            0
+          ],
+          "parent": "body",
+          "cubes": [
+            {
+              "origin": [
+                -7.5,
+                25.9,
+                -2.0
+              ],
+              "size": [
+                4,
+                3,
+                4
+              ],
+              "uv": [
+                8,
+                47
+              ],
+              "name": "left_shoulder"
+            },
+            {
+              "origin": [
+                -7.0,
+                20.0,
+                -2.0
+              ],
+              "size": [
+                3,
+                6,
+                4
+              ],
+              "uv": [
+                24,
+                47
+              ],
+              "name": "left_bicep"
+            },
+            {
+              "origin": [
+                -7.0,
+                14.0,
+                -1.8
+              ],
+              "size": [
+                3,
+                6,
+                4
+              ],
+              "uv": [
+                38,
+                47
+              ],
+              "name": "left_vambrace"
+            },
+            {
+              "origin": [
+                -7.0,
+                12.0,
+                -1.8
+              ],
+              "size": [
+                3,
+                2,
+                4
+              ],
+              "uv": [
+                52,
+                47
+              ],
+              "name": "left_gauntlet"
+            },
+            {
+              "origin": [
+                -8.0,
+                19.0,
+                -2.05
+              ],
+              "size": [
+                1,
+                8,
+                4
+              ],
+              "uv": [
+                66,
+                47
+              ],
+              "name": "left_rags_upper"
+            },
+            {
+              "origin": [
+                -7.8,
+                9.0,
+                -1.5
+              ],
+              "size": [
+                1,
+                10,
+                3
+              ],
+              "uv": [
+                76,
+                47
+              ],
+              "name": "left_rags_lower"
+            }
+          ]
+        },
+        {
+          "name": "right_leg",
+          "pivot": [
+            1.5,
+            15,
+            0
+          ],
+          "parent": "root",
+          "cubes": [
+            {
+              "origin": [
+                0.0,
+                7.5,
+                -1.9
+              ],
+              "size": [
+                3,
+                8,
+                4
+              ],
+              "uv": [
+                84,
+                47
+              ],
+              "name": "right_thigh"
+            },
+            {
+              "origin": [
+                2.8,
+                8.0,
+                -2.1
+              ],
+              "size": [
+                1,
+                7,
+                4
+              ],
+              "uv": [
+                98,
+                47
+              ],
+              "name": "right_cuisse"
+            },
+            {
+              "origin": [
+                0.0,
+                7.0,
+                -2.5
+              ],
+              "size": [
+                3,
+                3,
+                1
+              ],
+              "uv": [
+                108,
+                47
+              ],
+              "name": "right_poleyn"
+            },
+            {
+              "origin": [
+                0.0,
+                2.0,
+                -1.9
+              ],
+              "size": [
+                3,
+                6,
+                4
+              ],
+              "uv": [
+                0,
+                60
+              ],
+              "name": "right_shin"
+            },
+            {
+              "origin": [
+                0.0,
+                0.0,
+                -3.9
+              ],
+              "size": [
+                3,
+                2,
+                6
+              ],
+              "uv": [
+                14,
+                60
+              ],
+              "name": "right_sabaton"
+            }
+          ]
+        },
+        {
+          "name": "left_leg",
+          "pivot": [
+            -1.5,
+            15,
+            0
+          ],
+          "parent": "root",
+          "cubes": [
+            {
+              "origin": [
+                -3.0,
+                7.5,
+                -1.9
+              ],
+              "size": [
+                3,
+                8,
+                4
+              ],
+              "uv": [
+                32,
+                60
+              ],
+              "name": "left_thigh"
+            },
+            {
+              "origin": [
+                -3.8,
+                8.0,
+                -2.1
+              ],
+              "size": [
+                1,
+                7,
+                4
+              ],
+              "uv": [
+                46,
+                60
+              ],
+              "name": "left_cuisse"
+            },
+            {
+              "origin": [
+                -3.0,
+                7.0,
+                -2.5
+              ],
+              "size": [
+                3,
+                3,
+                1
+              ],
+              "uv": [
+                56,
+                60
+              ],
+              "name": "left_poleyn"
+            },
+            {
+              "origin": [
+                -3.0,
+                2.0,
+                -1.9
+              ],
+              "size": [
+                3,
+                6,
+                4
+              ],
+              "uv": [
+                64,
+                60
+              ],
+              "name": "left_shin"
+            },
+            {
+              "origin": [
+                -3.0,
+                0.0,
+                -3.9
+              ],
+              "size": [
+                3,
+                2,
+                6
+              ],
+              "uv": [
+                78,
+                60
+              ],
+              "name": "left_sabaton"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

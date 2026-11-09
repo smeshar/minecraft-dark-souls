@@ -37,8 +37,7 @@ public class ArtoriasClientMod implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        // Register Artorias Custom Model Layer and Renderer
-        EntityModelLayerRegistry.registerModelLayer(ArtoriasRenderer.ARTORIAS_LAYER, ArtoriasModel::getTexturedModelData);
+        // Register Artorias Boss (GeckoLib) Renderer
         EntityRendererRegistry.register(ArtoriasMod.ARTORIAS_ENTITY, ArtoriasRenderer::new);
 
         // Register Warg Model Layer and Renderers
