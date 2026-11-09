@@ -68,13 +68,13 @@ public class ArtoriasEntity extends HostileEntity {
 
     public static DefaultAttributeContainer.Builder createAttributes() {
         return HostileEntity.createHostileAttributes()
-                .add(EntityAttributes.MAX_HEALTH, 800.0) // 400 Hearts boss HP
-                .add(EntityAttributes.MOVEMENT_SPEED, 0.35)
-                .add(EntityAttributes.ATTACK_DAMAGE, 9.0)
-                .add(EntityAttributes.ARMOR, 16.0)
-                .add(EntityAttributes.ARMOR_TOUGHNESS, 8.0)
-                .add(EntityAttributes.KNOCKBACK_RESISTANCE, 0.95)
-                .add(EntityAttributes.FOLLOW_RANGE, 64.0);
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 800.0) // 400 Hearts boss HP
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.35)
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 9.0)
+                .add(EntityAttributes.GENERIC_ARMOR, 16.0)
+                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 8.0)
+                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.95)
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 64.0);
     }
 
     @Override
@@ -142,18 +142,18 @@ public class ArtoriasEntity extends HostileEntity {
         super.tick();
 
         // Update Boss Bar
-        if (!this.getEntityWorld().isClient()) {
+        if (!this.getWorld().isClient()) {
             this.bossBar.setPercent(this.getHealth() / this.getMaxHealth());
         }
 
         // Ambient dark abyss particles
-        if (this.getEntityWorld().isClient()) {
+        if (this.getWorld().isClient()) {
             double px = this.getX() + (this.random.nextDouble() - 0.5) * 1.2;
             double py = this.getY() + this.random.nextDouble() * 2.2;
             double pz = this.getZ() + (this.random.nextDouble() - 0.5) * 1.2;
-            this.getEntityWorld().addParticleClient(ParticleTypes.SOUL_FIRE_FLAME, px, py, pz, 0.0, 0.02, 0.0);
+            this.getWorld().addParticle(ParticleTypes.SOUL_FIRE_FLAME, px, py, pz, 0.0, 0.02, 0.0);
             if (isPhaseTwo()) {
-                this.getEntityWorld().addParticleClient(ParticleTypes.WITCH, px, py, pz, 0.0, 0.01, 0.0);
+                this.getWorld().addParticle(ParticleTypes.WITCH, px, py, pz, 0.0, 0.01, 0.0);
             }
         } else {
             handleServerTick();
@@ -167,10 +167,10 @@ public class ArtoriasEntity extends HostileEntity {
         if (isStaggered()) {
             staggerTicks--;
             this.setVelocity(Vec3d.ZERO);
-            this.velocityDirty = true;
+            this.velocityModified = true;
 
             // Swirl dizzy particles above head
-            if (this.getEntityWorld() instanceof ServerWorld sw && this.age % 4 == 0) {
+            if (this.getWorld() instanceof ServerWorld sw && this.age % 4 == 0) {
                 sw.spawnParticles(ParticleTypes.CRIT, this.getX(), this.getY() + 2.8, this.getZ(), 4, 0.2, 0.1, 0.2, 0.02);
             }
 
@@ -205,9 +205,9 @@ public class ArtoriasEntity extends HostileEntity {
 
         Vec3d back = this.getRotationVec(1.0f).multiply(-0.8).add(0, 0.4, 0);
         this.setVelocity(back);
-        this.velocityDirty = true;
+        this.velocityModified = true;
 
-        if (this.getEntityWorld() instanceof ServerWorld sw) {
+        if (this.getWorld() instanceof ServerWorld sw) {
             sw.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_WARDEN_ROAR, SoundCategory.HOSTILE, 2.0f, 0.7f);
             sw.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.HOSTILE, 1.8f, 0.6f);
 
@@ -219,7 +219,7 @@ public class ArtoriasEntity extends HostileEntity {
     }
 
     private void executeAttackTick() {
-        if (!(this.getEntityWorld() instanceof ServerWorld sw)) return;
+        if (!(this.getWorld() instanceof ServerWorld sw)) return;
 
         // Safety watchdog: an attack cannot get stuck for more than 50 ticks
         if (attackTicks > 50 && getAttackState() != STATE_PHASE_TWO_ROAR) {
@@ -239,10 +239,10 @@ public class ArtoriasEntity extends HostileEntity {
                     Box blast = new Box(this.getX() - 8, this.getY() - 2, this.getZ() - 8, this.getX() + 8, this.getY() + 4, this.getZ() + 8);
                     for (Entity e : sw.getOtherEntities(this, blast)) {
                         if (e instanceof PlayerEntity p) {
-                            p.damage(sw, sw.getDamageSources().mobAttack(this), 8.0f);
-                            Vec3d push = p.getEntityPos().subtract(this.getEntityPos()).normalize().multiply(1.5).add(0, 0.35, 0);
+                            p.damage(this.getWorld().getDamageSources().mobAttack(this), 8.0f);
+                            Vec3d push = p.getPos().subtract(this.getPos()).normalize().multiply(1.5).add(0, 0.35, 0);
                             p.setVelocity(push);
-                            p.velocityDirty = true;
+                            p.velocityModified = true;
                         }
                     }
 
@@ -262,7 +262,7 @@ public class ArtoriasEntity extends HostileEntity {
                     Box slamBox = new Box(this.getX() - 5, this.getY() - 1, this.getZ() - 5, this.getX() + 5, this.getY() + 3, this.getZ() + 5);
                     for (Entity e : sw.getOtherEntities(this, slamBox)) {
                         if (e instanceof PlayerEntity p) {
-                            p.damage(sw, sw.getDamageSources().mobAttack(this), isPhaseTwo() ? 12.0f : 9.0f);
+                            p.damage(this.getWorld().getDamageSources().mobAttack(this), isPhaseTwo() ? 12.0f : 9.0f);
                             p.takeKnockback(1.1, this.getX() - p.getX(), this.getZ() - p.getZ());
                         }
                     }
@@ -271,9 +271,9 @@ public class ArtoriasEntity extends HostileEntity {
                         consecutiveFlips++;
                         attackTicks = 0;
                         LivingEntity target = this.getTarget();
-                        Vec3d leap = target.getEntityPos().subtract(this.getEntityPos()).normalize().multiply(1.1).add(0, 0.7, 0);
+                        Vec3d leap = target.getPos().subtract(this.getPos()).normalize().multiply(1.1).add(0, 0.7, 0);
                         this.setVelocity(leap);
-                        this.velocityDirty = true;
+                        this.velocityModified = true;
                         sw.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.HOSTILE, 1.4f, 0.6f);
                         return;
                     }
@@ -290,7 +290,7 @@ public class ArtoriasEntity extends HostileEntity {
                     Box hitBox = this.getBoundingBox().expand(0.8);
                     for (Entity e : sw.getOtherEntities(this, hitBox)) {
                         if (e instanceof PlayerEntity p) {
-                            p.damage(sw, sw.getDamageSources().mobAttack(this), 10.0f);
+                            p.damage(this.getWorld().getDamageSources().mobAttack(this), 10.0f);
                             p.takeKnockback(0.9, this.getX() - p.getX(), this.getZ() - p.getZ());
                         }
                     }
@@ -310,7 +310,7 @@ public class ArtoriasEntity extends HostileEntity {
                     Box spinBox = new Box(this.getX() - 4.5, this.getY() - 1, this.getZ() - 4.5, this.getX() + 4.5, this.getY() + 3, this.getZ() + 4.5);
                     for (Entity e : sw.getOtherEntities(this, spinBox)) {
                         if (e instanceof PlayerEntity p) {
-                            p.damage(sw, sw.getDamageSources().mobAttack(this), 9.5f);
+                            p.damage(this.getWorld().getDamageSources().mobAttack(this), 9.5f);
                             p.takeKnockback(1.4, this.getX() - p.getX(), this.getZ() - p.getZ());
                         }
                     }
@@ -328,14 +328,14 @@ public class ArtoriasEntity extends HostileEntity {
                         double vx = dir.x * Math.cos(angle) - dir.z * Math.sin(angle);
                         double vz = dir.x * Math.sin(angle) + dir.z * Math.cos(angle);
 
-                        Vec3d splashPos = this.getEntityPos().add(vx * 5.0, 0.5, vz * 5.0);
+                        Vec3d splashPos = this.getPos().add(vx * 5.0, 0.5, vz * 5.0);
                         sw.spawnParticles(ParticleTypes.WITCH, splashPos.x, splashPos.y, splashPos.z, 20, 0.8, 0.3, 0.8, 0.04);
                         sw.spawnParticles(ParticleTypes.SQUID_INK, splashPos.x, splashPos.y, splashPos.z, 10, 0.5, 0.2, 0.5, 0.02);
 
                         Box sludgeBox = new Box(splashPos.x - 2, splashPos.y - 1, splashPos.z - 2, splashPos.x + 2, splashPos.y + 2, splashPos.z + 2);
                         for (Entity e : sw.getOtherEntities(this, sludgeBox)) {
                             if (e instanceof PlayerEntity p) {
-                                p.damage(sw, sw.getDamageSources().mobAttack(this), 7.0f);
+                                p.damage(this.getWorld().getDamageSources().mobAttack(this), 7.0f);
                             }
                         }
                     }
@@ -350,7 +350,7 @@ public class ArtoriasEntity extends HostileEntity {
     }
 
     @Override
-    public boolean damage(ServerWorld world, DamageSource source, float amount) {
+    public boolean damage(DamageSource source, float amount) {
         if (getAttackState() == STATE_PHASE_TWO_ROAR) {
             return false;
         }
@@ -358,19 +358,21 @@ public class ArtoriasEntity extends HostileEntity {
         // CRITICAL RIPOSTE: Player attacks while Artorias is Staggered!
         if (isStaggered() && source.getAttacker() instanceof PlayerEntity player) {
             float riposteDamage = 130.0f;
-            super.damage(world, source, riposteDamage);
+            super.damage(source, riposteDamage);
 
             setAttackState(STATE_IDLE);
             setPoise(MAX_POISE);
 
-            world.spawnParticles(ParticleTypes.CRIT, this.getX(), this.getY() + 1.5, this.getZ(), 45, 0.8, 0.8, 0.8, 0.2);
-            world.spawnParticles(ParticleTypes.DAMAGE_INDICATOR, this.getX(), this.getY() + 1.5, this.getZ(), 20, 0.5, 0.5, 0.5, 0.1);
-            world.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, SoundCategory.PLAYERS, 1.8f, 0.6f);
-            world.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ITEM_TRIDENT_THUNDER.value(), SoundCategory.PLAYERS, 1.6f, 1.4f);
+            if (this.getWorld() instanceof ServerWorld world) {
+                world.spawnParticles(ParticleTypes.CRIT, this.getX(), this.getY() + 1.5, this.getZ(), 45, 0.8, 0.8, 0.8, 0.2);
+                world.spawnParticles(ParticleTypes.DAMAGE_INDICATOR, this.getX(), this.getY() + 1.5, this.getZ(), 20, 0.5, 0.5, 0.5, 0.1);
+                world.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, SoundCategory.PLAYERS, 1.8f, 0.6f);
+                world.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ITEM_TRIDENT_THUNDER.value(), SoundCategory.PLAYERS, 1.6f, 1.4f);
+            }
             return true;
         }
 
-        boolean damaged = super.damage(world, source, amount);
+        boolean damaged = super.damage(source, amount);
         if (damaged) {
             this.timeSinceLastHit = 0;
 
@@ -398,7 +400,7 @@ public class ArtoriasEntity extends HostileEntity {
             setAttackState(STATE_STAGGERED);
             this.staggerTicks = 120; // 6 seconds staggered
 
-            if (this.getEntityWorld() instanceof ServerWorld sw) {
+            if (this.getWorld() instanceof ServerWorld sw) {
                 sw.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.BLOCK_ANVIL_LAND, SoundCategory.HOSTILE, 1.8f, 0.7f);
                 sw.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_WARDEN_SONIC_BOOM, SoundCategory.HOSTILE, 1.5f, 1.2f);
                 sw.spawnParticles(ParticleTypes.EXPLOSION_EMITTER, this.getX(), this.getY() + 1.5, this.getZ(), 2, 0.2, 0.2, 0.2, 0.05);
@@ -426,15 +428,15 @@ public class ArtoriasEntity extends HostileEntity {
     @Override
     protected void dropEquipment(ServerWorld world, DamageSource source, boolean causedByPlayer) {
         super.dropEquipment(world, source, causedByPlayer);
-        this.dropItem(world, ArtoriasMod.ARTORIAS_GREATSWORD);
-        this.dropItem(world, ArtoriasMod.SOUL_OF_ARTORIAS);
-        this.dropItem(world, ArtoriasMod.ABYSSAL_PENDANT);
+        this.dropItem(ArtoriasMod.ARTORIAS_GREATSWORD);
+        this.dropItem(ArtoriasMod.SOUL_OF_ARTORIAS);
+        this.dropItem(ArtoriasMod.ABYSSAL_PENDANT);
     }
 
     @Override
     public void onDeath(DamageSource damageSource) {
         super.onDeath(damageSource);
-        if (this.getEntityWorld() instanceof ServerWorld sw) {
+        if (this.getWorld() instanceof ServerWorld sw) {
             sw.spawnParticles(ParticleTypes.EXPLOSION_EMITTER, this.getX(), this.getY() + 1.5, this.getZ(), 4, 1.0, 1.0, 1.0, 0.1);
             sw.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.HOSTILE, 2.0f, 1.0f);
 
@@ -509,19 +511,19 @@ public class ArtoriasEntity extends HostileEntity {
                 if (distSq > 100.0) {
                     // Far away: Glide Lunge thrust across arena
                     boss.setAttackState(STATE_GLIDE_LUNGE);
-                    Vec3d dash = target.getEntityPos().subtract(boss.getEntityPos()).normalize().multiply(1.35).add(0, 0.1, 0);
+                    Vec3d dash = target.getPos().subtract(boss.getPos()).normalize().multiply(1.35).add(0, 0.1, 0);
                     boss.setVelocity(dash);
-                    boss.velocityDirty = true;
-                    boss.getEntityWorld().playSound(null, boss.getX(), boss.getY(), boss.getZ(),
+                    boss.velocityModified = true;
+                    boss.getWorld().playSound(null, boss.getX(), boss.getY(), boss.getZ(),
                             SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.HOSTILE, 1.4f, 0.6f);
                 } else if (distSq > 32.0) {
                     // Mid range: Somersault Flip or Abyss Sludge
                     if (boss.random.nextBoolean()) {
                         boss.setAttackState(STATE_SOMERSAULT_FLIP);
-                        Vec3d leap = target.getEntityPos().subtract(boss.getEntityPos()).normalize().multiply(1.15).add(0, 0.75, 0);
+                        Vec3d leap = target.getPos().subtract(boss.getPos()).normalize().multiply(1.15).add(0, 0.75, 0);
                         boss.setVelocity(leap);
-                        boss.velocityDirty = true;
-                        boss.getEntityWorld().playSound(null, boss.getX(), boss.getY(), boss.getZ(),
+                        boss.velocityModified = true;
+                        boss.getWorld().playSound(null, boss.getX(), boss.getY(), boss.getZ(),
                                 SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.HOSTILE, 1.5f, 0.5f);
                     } else {
                         boss.setAttackState(STATE_ABYSS_SLUDGE);

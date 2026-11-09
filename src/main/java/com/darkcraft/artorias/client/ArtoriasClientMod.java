@@ -6,6 +6,8 @@ import com.darkcraft.artorias.entity.artorias.ArtoriasModel;
 import com.darkcraft.artorias.entity.artorias.ArtoriasRenderer;
 import com.darkcraft.artorias.entity.goblin.GoblinModel;
 import com.darkcraft.artorias.entity.goblin.GoblinRenderer;
+import com.darkcraft.artorias.entity.margit.MargitDaggerRenderer;
+import com.darkcraft.artorias.entity.margit.MargitRenderer;
 import com.darkcraft.artorias.entity.omen.OmenModel;
 import com.darkcraft.artorias.entity.omen.OmenRenderer;
 import com.darkcraft.artorias.entity.warg.WargModel;
@@ -21,7 +23,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.glfw.GLFW;
 
@@ -55,6 +56,10 @@ public class ArtoriasClientMod implements ClientModInitializer {
         EntityRendererRegistry.register(ArtoriasMod.GOBLIN_ENTITY, GoblinRenderer::new);
         EntityRendererRegistry.register(ArtoriasMod.GOBLIN_KNIGHT_ENTITY, GoblinRenderer::new);
 
+        // Register Margit, the Fell Omen Boss (GeckoLib) & Dagger Renderers
+        EntityRendererRegistry.register(ArtoriasMod.MARGIT_ENTITY, MargitRenderer::new);
+        EntityRendererRegistry.register(ArtoriasMod.MARGIT_DAGGER_ENTITY, MargitDaggerRenderer::new);
+
         // Register Ground Slam feature (keybindings, networking, HUD cooldown)
         GroundSlamClient.initClient();
 
@@ -63,7 +68,7 @@ public class ArtoriasClientMod implements ClientModInitializer {
                 "key.artorias.dodge_roll",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_LEFT_ALT,
-                KeyBinding.Category.MOVEMENT
+                KeyBinding.MOVEMENT_CATEGORY
         ));
 
         // Listen for client tick events
@@ -90,20 +95,18 @@ public class ArtoriasClientMod implements ClientModInitializer {
                 double inputX = 0;
                 double inputZ = 0;
 
-                if (client.player.input != null) {
-                    Vec2f moveVec = client.player.input.getMovementInput();
-                    inputX = moveVec.x;
-                    inputZ = moveVec.y;
-                }
+                if (client.options.forwardKey.isPressed()) inputZ += 1.0;
+                if (client.options.backKey.isPressed()) inputZ -= 1.0;
+                if (client.options.leftKey.isPressed()) inputX += 1.0;
+                if (client.options.rightKey.isPressed()) inputX -= 1.0;
 
-                // Instant client-side physics prediction for butter-smooth dodge
+                // Client-side predictive roll velocity for immediate visual response
                 Vec3d look = client.player.getRotationVec(1.0f);
                 Vec3d forward = new Vec3d(look.x, 0, look.z).normalize();
                 Vec3d left = new Vec3d(forward.z, 0, -forward.x);
 
                 Vec3d rollDirection;
                 if (Math.abs(inputX) < 0.01 && Math.abs(inputZ) < 0.01) {
-                    // Backstep
                     rollDirection = forward.multiply(-0.95);
                 } else {
                     rollDirection = forward.multiply(inputZ).add(left.multiply(inputX)).normalize();
@@ -116,7 +119,7 @@ public class ArtoriasClientMod implements ClientModInitializer {
                         verticalHop,
                         rollDirection.z * horizontalPower
                 );
-                client.player.velocityDirty = true;
+                client.player.velocityModified = true;
                 clientRollCooldown = 14;
 
                 // Immediate client sound feedback (zero latency)

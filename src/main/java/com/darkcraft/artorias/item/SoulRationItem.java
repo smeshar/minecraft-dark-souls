@@ -1,6 +1,5 @@
 package com.darkcraft.artorias.item;
 
-import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -12,12 +11,12 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
 import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 
-import java.util.function.Consumer;
+import java.util.List;
 
 public class SoulRationItem extends Item {
     public SoulRationItem(Settings settings) {
@@ -25,7 +24,7 @@ public class SoulRationItem extends Item {
     }
 
     @Override
-    public ActionResult use(World world, PlayerEntity user, Hand hand) {
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
         if (user.canConsume(false)) {
             if (!world.isClient()) {
@@ -47,14 +46,14 @@ public class SoulRationItem extends Item {
                 itemStack.decrement(1);
             }
             user.incrementStat(Stats.USED.getOrCreateStat(this));
-            return ActionResult.SUCCESS;
+            return TypedActionResult.success(itemStack, world.isClient());
         }
-        return ActionResult.FAIL;
+        return TypedActionResult.pass(itemStack);
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, TooltipContext context, TooltipDisplayComponent displayComponent, Consumer<Text> textConsumer, TooltipType type) {
-        textConsumer.accept(Text.translatable("item.artorias.soul_ration.desc").formatted(Formatting.GOLD));
-        super.appendTooltip(stack, context, displayComponent, textConsumer, type);
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
+        tooltip.add(Text.translatable("item.artorias.soul_ration.desc").formatted(Formatting.GRAY));
+        super.appendTooltip(stack, context, tooltip, type);
     }
 }
