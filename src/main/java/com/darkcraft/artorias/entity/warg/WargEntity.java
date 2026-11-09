@@ -50,22 +50,22 @@ public class WargEntity extends HostileEntity {
 
     public static DefaultAttributeContainer.Builder createGiantAttributes() {
         return HostileEntity.createHostileAttributes()
-                .add(EntityAttributes.MAX_HEALTH, 60.0)
-                .add(EntityAttributes.MOVEMENT_SPEED, 0.35)
-                .add(EntityAttributes.ATTACK_DAMAGE, 8.0)
-                .add(EntityAttributes.ARMOR, 6.0)
-                .add(EntityAttributes.KNOCKBACK_RESISTANCE, 0.5)
-                .add(EntityAttributes.FOLLOW_RANGE, 32.0);
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 60.0)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.35)
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 8.0)
+                .add(EntityAttributes.GENERIC_ARMOR, 6.0)
+                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.5)
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 32.0);
     }
 
     public static DefaultAttributeContainer.Builder createLesserAttributes() {
         return HostileEntity.createHostileAttributes()
-                .add(EntityAttributes.MAX_HEALTH, 24.0)
-                .add(EntityAttributes.MOVEMENT_SPEED, 0.38)
-                .add(EntityAttributes.ATTACK_DAMAGE, 5.0)
-                .add(EntityAttributes.ARMOR, 2.0)
-                .add(EntityAttributes.KNOCKBACK_RESISTANCE, 0.2)
-                .add(EntityAttributes.FOLLOW_RANGE, 28.0);
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 24.0)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.38)
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 5.0)
+                .add(EntityAttributes.GENERIC_ARMOR, 2.0)
+                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.2)
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 28.0);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class WargEntity extends HostileEntity {
 
         if (this.attackTicks > 0) {
             this.attackTicks--;
-            if (this.attackTicks == 0 && !this.getEntityWorld().isClient()) {
+            if (this.attackTicks == 0 && !this.getWorld().isClient()) {
                 setAttackState(STATE_IDLE);
             }
         }
@@ -129,46 +129,46 @@ public class WargEntity extends HostileEntity {
         super.dropEquipment(world, source, causedByPlayer);
         int count = isGiant() ? (2 + world.getRandom().nextInt(3)) : (1 + world.getRandom().nextInt(2));
         for (int i = 0; i < count; i++) {
-            this.dropItem(world, ArtoriasMod.SOUL_RATION);
+            this.dropItem(ArtoriasMod.SOUL_RATION);
         }
     }
 
     public void triggerPounce(LivingEntity target) {
-        if (!this.getEntityWorld().isClient()) {
+        if (!this.getWorld().isClient()) {
             this.setAttackState(STATE_POUNCE);
             this.attackTicks = 25;
 
-            Vec3d dir = target.getEntityPos().subtract(this.getEntityPos());
+            Vec3d dir = target.getPos().subtract(this.getPos());
             Vec3d leap = new Vec3d(dir.x, 0, dir.z).normalize().multiply(1.2).add(0, 0.42, 0);
             this.setVelocity(leap);
-            this.velocityDirty = true;
+            this.velocityModified = true;
 
-            this.getEntityWorld().playSound(null, this.getX(), this.getY(), this.getZ(),
+            this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(),
                     SoundEvents.ENTITY_POLAR_BEAR_WARNING, SoundCategory.HOSTILE, 1.4f, isGiant() ? 0.6f : 1.1f);
         }
     }
 
     public void triggerBite(LivingEntity target) {
-        if (!this.getEntityWorld().isClient()) {
+        if (!this.getWorld().isClient()) {
             this.setAttackState(STATE_BITE);
             this.attackTicks = 12;
 
-            this.tryAttack((ServerWorld) this.getEntityWorld(), target);
-            this.getEntityWorld().playSound(null, this.getX(), this.getY(), this.getZ(),
+            this.tryAttack(target);
+            this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(),
                     SoundEvents.ENTITY_WOLF_SHAKE, SoundCategory.HOSTILE, 1.2f, isGiant() ? 0.7f : 1.2f);
         }
     }
 
     public void triggerHowl() {
-        if (!this.getEntityWorld().isClient() && isGiant() && howlCooldown <= 0) {
+        if (!this.getWorld().isClient() && isGiant() && howlCooldown <= 0) {
             this.setAttackState(STATE_HOWL);
             this.attackTicks = 35;
             this.howlCooldown = 300; // 15 seconds
 
-            this.getEntityWorld().playSound(null, this.getX(), this.getY(), this.getZ(),
+            this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(),
                     SoundEvents.ENTITY_RAVAGER_ROAR, SoundCategory.HOSTILE, 1.8f, 0.65f);
 
-            if (this.getEntityWorld() instanceof ServerWorld sw) {
+            if (this.getWorld() instanceof ServerWorld sw) {
                 sw.spawnParticles(ParticleTypes.SOUL_FIRE_FLAME, this.getX(), this.getY() + 1.2, this.getZ(), 25, 0.8, 0.5, 0.8, 0.05);
 
                 // Buff nearby wargs
@@ -259,9 +259,9 @@ public class WargEntity extends HostileEntity {
             LivingEntity target = warg.getTarget();
             if (target == null) return;
 
-            Vec3d toTarget = target.getEntityPos().subtract(warg.getEntityPos()).normalize();
+            Vec3d toTarget = target.getPos().subtract(warg.getPos()).normalize();
             Vec3d lateral = new Vec3d(-toTarget.z * circleDir, 0, toTarget.x * circleDir).multiply(4.0);
-            Vec3d circlePos = warg.getEntityPos().add(lateral).add(toTarget.multiply(1.5));
+            Vec3d circlePos = warg.getPos().add(lateral).add(toTarget.multiply(1.5));
 
             warg.getNavigation().startMovingTo(circlePos.x, circlePos.y, circlePos.z, 1.15);
         }

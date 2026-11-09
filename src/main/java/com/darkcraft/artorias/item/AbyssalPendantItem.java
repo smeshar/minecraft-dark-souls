@@ -2,7 +2,6 @@ package com.darkcraft.artorias.item;
 
 import com.darkcraft.artorias.ArtoriasMod;
 import com.darkcraft.artorias.entity.artorias.ArtoriasEntity;
-import net.minecraft.entity.SpawnReason;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.particle.ParticleTypes;
@@ -24,7 +23,7 @@ public class AbyssalPendantItem extends Item {
             ServerWorld world = (ServerWorld) context.getWorld();
             BlockPos spawnPos = context.getBlockPos().offset(context.getSide());
 
-            ArtoriasEntity boss = ArtoriasMod.ARTORIAS_ENTITY.create(world, SpawnReason.SPAWN_ITEM_USE);
+            ArtoriasEntity boss = ArtoriasMod.ARTORIAS_ENTITY.create(world);
             if (boss != null) {
                 boss.refreshPositionAndAngles(spawnPos.getX() + 0.5, spawnPos.getY(), spawnPos.getZ() + 0.5, context.getPlayerYaw(), 0.0f);
                 world.spawnEntity(boss);
