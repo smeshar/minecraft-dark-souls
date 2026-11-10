@@ -32,8 +32,8 @@
   "message.artorias.shackle_bound": "Margit is pinned to the ground by golden omen chains!",
   "key.artorias.dodge_roll": "Dodge Roll (i-frames)",
   "key.artorias.ground_slam": "Ground Slam (Air Attack)",
-  "category.artorias": "Dark Souls Combat",
-  "message.artorias.boss_spawn": "§4[Dark Souls] §cKnight Artorias, the Abysswalker has awakened! Steel yourselves!",
+  "category.artorias": "MinecraftDarkSouls Combat",
+  "message.artorias.boss_spawn": "§4[MinecraftDarkSouls] §cKnight Artorias, the Abysswalker has awakened! Steel yourselves!",
   "message.artorias.stance_break": "§6STANCE BROKEN! Artorias is vulnerable for a CRITICAL RIPOSTE!",
   "message.artorias.phase_two": "§5The Abyss overcomes Artorias! Phase 2 has begun!",
   "message.artorias.boss_slain": "§eLEGEND VANQUISHED! Knight Artorias has been laid to rest!"

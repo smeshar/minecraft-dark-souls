@@ -32,8 +32,8 @@
   "message.artorias.shackle_bound": "Маргит прикован золотыми цепями к земле!",
   "key.artorias.dodge_roll": "Перекат (кадры неуязвимости)",
   "key.artorias.ground_slam": "Удар о землю (В воздухе)",
-  "category.artorias": "Dark Souls Боевка",
-  "message.artorias.boss_spawn": "§4[Dark Souls] §cРыцарь Арториас Путник Бездны пробудился! Приготовьтесь к бою!",
+  "category.artorias": "MinecraftDarkSouls Боёвка",
+  "message.artorias.boss_spawn": "§4[MinecraftDarkSouls] §cРыцарь Арториас Путник Бездны пробудился! Приготовьтесь к бою!",
   "message.artorias.stance_break": "§6СТОЙКА СЛОМАНА! Арториас оглушен — нанесите КРИТИЧЕСКИЙ УДАР!",
   "message.artorias.phase_two": "§5Бездна поглощает Арториаса! Началась 2-я фаза!",
   "message.artorias.boss_slain": "§eВЕЛИКИЙ ВРАГ ПОВЕРЖЕН! Покойся с миром, Арториас!"
